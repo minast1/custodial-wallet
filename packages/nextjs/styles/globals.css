@@ -1,71 +1,5 @@
 @import "tailwindcss";
-
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
-@theme {
-  --shadow-center: 0 0 12px -2px rgb(0 0 0 / 0.05);
-  --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@plugin "daisyui" {
-  themes:
-    light,
-    dark --prefersdark;
-}
-
-@plugin "daisyui/theme" {
-  name: "light";
-
-  --color-primary: #93bbfb;
-  --color-primary-content: #212638;
-  --color-secondary: #dae8ff;
-  --color-secondary-content: #212638;
-  --color-accent: #93bbfb;
-  --color-accent-content: #212638;
-  --color-neutral: #212638;
-  --color-neutral-content: #ffffff;
-  --color-base-100: #ffffff;
-  --color-base-200: #f4f8ff;
-  --color-base-300: #dae8ff;
-  --color-base-content: #212638;
-  --color-info: #93bbfb;
-  --color-success: #34eeb6;
-  --color-warning: #ffcf72;
-  --color-error: #ff8863;
-
-  --radius-field: 9999rem;
-  --radius-box: 1rem;
-  --tt-tailw: 6px;
-}
-
-@plugin "daisyui/theme" {
-  name: "dark";
-
-  --color-primary: #212638;
-  --color-primary-content: #f9fbff;
-  --color-secondary: #323f61;
-  --color-secondary-content: #f9fbff;
-  --color-accent: #4969a6;
-  --color-accent-content: #f9fbff;
-  --color-neutral: #f9fbff;
-  --color-neutral-content: #385183;
-  --color-base-100: #385183;
-  --color-base-200: #2a3655;
-  --color-base-300: #212638;
-  --color-base-content: #f9fbff;
-  --color-info: #385183;
-  --color-success: #34eeb6;
-  --color-warning: #ffcf72;
-  --color-error: #ff8863;
-
-  --radius-field: 9999rem;
-  --radius-box: 1rem;
-
-  --tt-tailw: 6px;
-  --tt-bg: var(--color-primary);
-}
+@import "tw-animate-css";
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -75,49 +9,180 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+  ---break---
+*/
+
+:root {
+  --background: hsl(240, 90.83%, 89.1%);
+  --foreground: hsl(240, 5.26%, 9.5%);
+
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 5.26%, 9.5%);
+
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 5.26%, 9.5%);
+
+  --primary: hsl(262, 70.94%, 33.93%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(220, 62.69%, 89.28%);
+  --secondary-foreground: hsl(240, 5.26%, 9.5%);
+
+  --muted: hsl(220, 62.69%, 89.28%);
+  --muted-foreground: hsl(240, 2.56%, 48.75%);
+
+  --accent: hsl(197, 55.04%, 47.09%);
+  --accent-foreground: hsl(240, 5.26%, 9.5%);
+
+  --destructive: hsl(0, 72.41%, 34.8%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  --border: hsl(240, 31.03%, 85.5%);
+  --input: hsl(240, 31.03%, 85.5%);
+  --ring: hsl(262, 70.94%, 33.93%);
+
+  --radius: 0.75rem;
+
+  /* Crypto-specific tokens */
+  --crypto-gradient-start: hsl(262, 70.94%, 33.93%);
+  --crypto-gradient-end: hsl(250, 100%, 37.5%);
+  --glass-bg: hsl(0, 0%, 100%);
+  --glass-border: hsl(240, 31.03%, 85.5%);
+  --success: hsl(142, 61.29%, 22.32%);
+  --warning: hsl(38, 85.19%, 27%);
+
+  --sidebar-background: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(240, 5.26%, 9.5%);
+  --sidebar-primary: hsl(262, 70.94%, 33.93%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(220, 62.69%, 89.28%);
+  --sidebar-accent-foreground: hsl(240, 5.26%, 9.5%);
+  --sidebar-border: hsl(240, 31.03%, 85.5%);
+  --sidebar-ring: hsl(262, 70.94%, 33.93%);
+}
+
+/*
+  ---break---
+*/
+
+.dark {
+  --background: hsl(240, 5.26%, 6.65%);
+  --foreground: hsl(0, 0%, 98%);
+
+  --card: hsl(240, 4.17%, 11.52%);
+  --card-foreground: hsl(0, 0%, 98%);
+
+  --popover: hsl(240, 4.17%, 11.52%);
+  --popover-foreground: hsl(0, 0%, 98%);
+
+  --primary: hsl(262, 70.94%, 33.93%);
+  --primary-foreground: hsl(0, 0%, 100%);
+
+  --secondary: hsl(240, 2.56%, 17.55%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+
+  --muted: hsl(240, 2.56%, 17.55%);
+  --muted-foreground: hsl(240, 4.44%, 63.38%);
+
+  --accent: hsl(197, 55.04%, 47.09%);
+  --accent-foreground: hsl(240, 5.26%, 6.65%);
+
+  --destructive: hsl(0, 72.41%, 34.8%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+
+  --border: hsl(240, 2.56%, 17.55%);
+  --input: hsl(240, 2.56%, 17.55%);
+  --ring: hsl(262, 70.94%, 33.93%);
+
+  /* Crypto-specific tokens - dark mode */
+  --crypto-gradient-start: hsl(262, 70.94%, 33.93%);
+  --crypto-gradient-end: hsl(250, 100%, 37.5%);
+  --glass-bg: hsl(240, 4.17%, 11.52%);
+  --glass-border: hsl(240, 2.56%, 24.38%);
+  --success: hsl(142, 61.29%, 22.32%);
+  --warning: hsl(38, 85.19%, 27%);
+
+  --sidebar-background: hsl(240, 4.17%, 11.52%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(262, 70.94%, 33.93%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(240, 2.56%, 17.55%);
+  --sidebar-accent-foreground: hsl(0, 0%, 98%);
+  --sidebar-border: hsl(240, 2.56%, 17.55%);
+  --sidebar-ring: hsl(262, 70.94%, 33.93%);
+}
+
+/*
+  ---break---
+*/
+
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+  * {
+    @apply border-border;
   }
-
-  p {
-    margin: 1rem 0;
-  }
-
   body {
-    min-height: 100vh;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    margin-bottom: 0.5rem;
-    line-height: 1;
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
+    font-variation-settings: "opsz" 32;
   }
 }
 
-:root,
-[data-theme] {
-  background: var(--color-base-200);
-}
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl bg-glass-bg/50 border border-glass-border;
+  }
 
-.btn {
-  @apply shadow-md;
-}
+  .crypto-gradient {
+    background: linear-gradient(135deg, var(--crypto-gradient-start), var(--crypto-gradient-end));
+  }
 
-.btn.btn-ghost {
-  @apply shadow-none;
-}
-
-.link {
-  text-underline-offset: 2px;
-}
-
-.link:hover {
-  opacity: 80%;
+  .crypto-gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--crypto-gradient-start), var(--crypto-gradient-end));
+  }
 }
