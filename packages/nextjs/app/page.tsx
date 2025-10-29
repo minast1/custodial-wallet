@@ -1,14 +1,40 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 //import Link from "next/link";
-//import { useAccount } from "wagmi";
 import { Wallet, Zap } from "lucide-react";
 import type { NextPage } from "next";
+import { useAccount } from "wagmi";
 import { Button } from "~~/components/ui/button";
 import { Card } from "~~/components/ui/card";
 
+//import { useGlobalState } from "~~/services/store/store";
+
 const Home: NextPage = () => {
-  // const { address: connectedAddress } = useAccount();
+  const { isConnected } = useAccount();
+  const router = useRouter();
+  const pathname = usePathname();
+  //const setConnection = useGlobalState(state => state.setIsConnected);
+  //const isWalletConnected = useGlobalState(state => state.isConnected);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("isWalletConnected");
+
+    // ✅ If connected and on homepage, redirect and set flag
+    if (isConnected && pathname === "/") {
+      localStorage.setItem("isWalletConnected", "true");
+      router.replace("/dashboard");
+    }
+
+    // ✅ If *not* connected and flag was previously set, clear it
+    if (!isConnected && stored) {
+      localStorage.removeItem("isWalletConnected");
+    }
+  }, [isConnected, router, pathname]);
+
+  const { openConnectModal } = useConnectModal();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -26,7 +52,7 @@ const Home: NextPage = () => {
 
         <div className="space-y-4">
           <Button
-            // onClick={handleConnect}
+            onClick={openConnectModal}
             className="w-full crypto-gradient text-primary-foreground hover:opacity-90 transition-all h-12 text-lg font-semibold shadow-lg"
           >
             <Wallet className="mr-2 h-5 w-5" />
