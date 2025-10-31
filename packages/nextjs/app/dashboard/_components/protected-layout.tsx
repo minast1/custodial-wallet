@@ -4,10 +4,24 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Loader from "./loader";
-import { ArrowLeftRight, Coins, History, Image, LogOut, Menu, Moon, Settings, Sun, Wallet, X } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Coins,
+  History,
+  Image,
+  Link2,
+  LogOut,
+  Menu,
+  Moon,
+  Settings,
+  Sun,
+  Wallet,
+  X,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAccount } from "wagmi";
 import { useDisconnect } from "wagmi";
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
 import { cn } from "~~/lib/utils";
 
@@ -25,13 +39,11 @@ const navItems = [
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const { isConnected, status } = useAccount();
+  const { isConnected, status, chain } = useAccount();
   const { disconnect } = useDisconnect();
   const cached = typeof window !== "undefined" && localStorage.getItem("isWalletConnected");
   const [isReady, setIsReady] = useState(!!cached);
   const pathname = usePathname();
-  //const isConnected = useGlobalState(state => state.isConnected);
-  // const setIsConnected = useGlobalState(state => state.setIsConnected);
 
   useEffect(() => {
     if (!isReady && !isConnected && pathname.startsWith("/dashboard")) router.replace("/");
@@ -73,7 +85,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
               href={item.path}
               className={cn(
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium`,
-                pathname.includes(item.path) ? `bg-primary text-primary-foreground shadow-lg` : `hover:bg-accent/50`,
+                pathname.includes(item.path) ? `bg-primary text-primary-foreground shadow-lg` : `hover:bg-accent/30`,
               )}
             >
               <item.icon className="w-5 h-5" />
@@ -163,15 +175,16 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="w-5 h-5" />
           </Button>
-
-          <div className="flex items-center gap-2 lg:ml-0 ml-auto">
-            <div className="hidden sm:block text-right mr-2">
-              <p className="text-xs text-muted-foreground">Connected</p>
-              <p className="text-sm font-mono font-semibold">
-                {/* {address?.slice(0, 6)}...{address?.slice(-4)} */} 0xderee1324234
-              </p>
-            </div>
-            <div className="w-4 h-4 rounded-full crypto-gradient" />
+          {/* Chain Status Button */}
+          <Button
+            aria-readonly
+            className="hidden md:flex h-7 hover:bg-green hover:text-white items-center gap-2 mr-auto bg-green-400 text-white"
+          >
+            <Link2 className="w-4 h-4" />
+            <span className="text-xs font-semibold">{chain?.name}</span>
+          </Button>
+          <div className="flex items-center gap-2 lg:gap-3 lg:ml-auto">
+            <RainbowKitCustomConnectButton />
           </div>
         </header>
 

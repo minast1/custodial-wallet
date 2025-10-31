@@ -7,6 +7,7 @@ import { normalize } from "viem/ens";
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { cn } from "~~/lib/utils";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 
 const textSizeMap = {
@@ -73,6 +74,7 @@ type AddressProps = {
   format?: "short" | "long";
   size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
   onlyEnsOrAddress?: boolean;
+  className?: string;
 };
 
 export const Address = ({
@@ -81,6 +83,7 @@ export const Address = ({
   format,
   size = "base",
   onlyEnsOrAddress = false,
+  className,
 }: AddressProps) => {
   const checkSumAddress = address ? getAddress(address) : undefined;
 
@@ -168,7 +171,7 @@ export const Address = ({
             </span>
           ))}
         <div className="flex">
-          <span className={`ml-1.5 ${textSizeMap[addressSize]} font-normal`}>
+          <span className={cn(className, `ml-1.5 ${textSizeMap[addressSize]}`)}>
             <AddressLinkWrapper
               disableAddressLink={disableAddressLink}
               blockExplorerAddressLink={blockExplorerAddressLink}

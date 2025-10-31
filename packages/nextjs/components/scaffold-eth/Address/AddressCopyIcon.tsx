@@ -6,18 +6,18 @@ export const AddressCopyIcon = ({ className, address }: { className?: string; ad
     useCopyToClipboard();
 
   return (
-    <button
+    <span
       onClick={e => {
         e.stopPropagation();
         copyAddressToClipboard(address);
       }}
-      type="button"
+      //type="button"
     >
       {isAddressCopiedToClipboard ? (
         <CheckCircleIcon className={className} aria-hidden="true" />
       ) : (
         <DocumentDuplicateIcon className={className} aria-hidden="true" />
       )}
-    </button>
+    </span>
   );
 };

@@ -1,6 +1,7 @@
 import { useTheme } from "next-themes";
 import { useAccount, useSwitchChain } from "wagmi";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
+import { DropdownMenuItem } from "~~/components/ui/dropdown-menu";
 import { getNetworkColor } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
@@ -18,7 +19,7 @@ export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
 
   return (
     <>
-      {allowedNetworks
+      {/* {allowedNetworks
         .filter(allowedNetwork => allowedNetwork.id !== chain?.id)
         .map(allowedNetwork => (
           <li key={allowedNetwork.id} className={hidden ? "hidden" : ""}>
@@ -42,6 +43,29 @@ export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
               </span>
             </button>
           </li>
+        ))} */}
+      {allowedNetworks
+        .filter(allowedNetwork => allowedNetwork.id !== chain?.id)
+        .map(allowedNetwork => (
+          <DropdownMenuItem
+            key={allowedNetwork.id}
+            className={hidden ? "hidden" : ""}
+            onSelect={() => {
+              switchChain?.({ chainId: allowedNetwork.id });
+            }}
+          >
+            <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <span>
+              Switch to{" "}
+              <span
+                style={{
+                  color: getNetworkColor(allowedNetwork, isDarkMode),
+                }}
+              >
+                {allowedNetwork.name}
+              </span>
+            </span>
+          </DropdownMenuItem>
         ))}
     </>
   );

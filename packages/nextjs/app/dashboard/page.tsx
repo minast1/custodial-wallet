@@ -3,11 +3,17 @@
 import React from "react";
 import { Fuel, Globe, TrendingUp } from "lucide-react";
 import { type NextPage } from "next";
+import { useAccount } from "wagmi";
+import { Balance } from "~~/components/scaffold-eth";
 import { Card, CardContent, CardHeader, CardTitle } from "~~/components/ui/card";
+import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { useGetGasPrice } from "~~/hooks/useGetGasPrice";
 
 const DashboardPage: NextPage = () => {
-  // const networkColor = useNetworkColor();
-  //  const { targetNetwork } = useTargetNetwork();
+  const networkColor = useNetworkColor();
+  const { address } = useAccount();
+  const { targetNetwork } = useTargetNetwork();
+  const { gasPrice } = useGetGasPrice();
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -22,10 +28,13 @@ const DashboardPage: NextPage = () => {
           <div className="text-primary-foreground">
             <p className="text-sm opacity-90 mb-1">Total Balance</p>
             <h2 className="text-5xl font-bold mb-4">
-              {/* {balance} */}
-              ETH
+              <Balance address={address} />
             </h2>
-            <p className="text-sm opacity-75">≈ $4,892.36 USD</p>
+            <span className="text-sm opacity-75 flex gap-2">
+              ≈
+              <Balance address={address} usdMode={true} />
+              USD
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -38,8 +47,11 @@ const DashboardPage: NextPage = () => {
             <Globe className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{/* {network} */}</div>
-            <p className="text-xs text-muted-foreground mt-1">Connected</p>
+            <div className="text-2xl font-bold">{targetNetwork.name}</div>
+            <span className="text-xs text-muted-foreground mt-1 flex gap-2">
+              Connected
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: networkColor }} />
+            </span>
           </CardContent>
         </Card>
 
@@ -50,9 +62,10 @@ const DashboardPage: NextPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {/* {gasPrice}  */}
+              {Number(gasPrice).toFixed(1)}
               Gwei
             </div>
+            {/* TODO: Add average gas price */}
             <p className="text-xs text-success mt-1">↓ 12% from average</p>
           </CardContent>
         </Card>

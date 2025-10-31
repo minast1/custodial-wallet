@@ -178,7 +178,7 @@
   }
 
   .crypto-gradient {
-    background: linear-gradient(135deg, var(--crypto-gradient-start), var(--crypto-gradient-end));
+    background-image: linear-gradient(135deg, var(--crypto-gradient-start), var(--crypto-gradient-end));
   }
 
   .crypto-gradient-text {

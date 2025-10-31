@@ -1,23 +1,36 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { NetworkOptions } from "./NetworkOptions";
+import { SquareArrowLeft } from "lucide-react";
 import { getAddress } from "viem";
 import { Address } from "viem";
-import { useAccount, useDisconnect } from "wagmi";
+import { useDisconnect } from "wagmi";
 import {
-  ArrowLeftOnRectangleIcon,
   ArrowTopRightOnSquareIcon,
   ArrowsRightLeftIcon,
   CheckCircleIcon,
   ChevronDownIcon,
-  DocumentDuplicateIcon,
-  EyeIcon,
+  DocumentDuplicateIcon, // EyeIcon,
   QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import { BlockieAvatar, isENS } from "~~/components/scaffold-eth";
-import { useCopyToClipboard, useOutsideClick } from "~~/hooks/scaffold-eth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger, //DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~~/components/ui/dropdown-menu";
+import { useCopyToClipboard, useNetworkColor } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
-const BURNER_WALLET_ID = "burnerWallet";
+//const BURNER_WALLET_ID = "burnerWallet";
 
 const allowedNetworks = getTargetNetworks();
 
@@ -35,24 +48,24 @@ export const AddressInfoDropdown = ({
   blockExplorerAddressLink,
 }: AddressInfoDropdownProps) => {
   const { disconnect } = useDisconnect();
-  const { connector } = useAccount();
+  const [showQrCodeModal, setShowQrCodeModal] = useState(false);
   const checkSumAddress = getAddress(address);
-
+  const router = useRouter();
   const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
     useCopyToClipboard();
-  const [selectingNetwork, setSelectingNetwork] = useState(false);
-  const dropdownRef = useRef<HTMLDetailsElement>(null);
+  const [selectingNetwork] = useState(false);
+  const networkColor = useNetworkColor();
+  const handleDisconnect = () => {
+    disconnect();
+    //setIsConnected(false);
+    localStorage.removeItem("isWalletConnected");
 
-  const closeDropdown = () => {
-    setSelectingNetwork(false);
-    dropdownRef.current?.removeAttribute("open");
+    router.push("/");
   };
-
-  useOutsideClick(dropdownRef, closeDropdown);
 
   return (
     <>
-      <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
+      {/* <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
         <summary className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
           <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
           <span className="ml-2 mr-1">
@@ -130,7 +143,76 @@ export const AddressInfoDropdown = ({
             </button>
           </li>
         </ul>
-      </details>
+      </details> */}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger className="p-2 py-0 bg-background/10 h-10 w-fit flex items-center border rounded-lg">
+          <div className="w-3 h-3 rounded-full animate-pulse mr-2" style={{ backgroundColor: networkColor }} />
+          <BlockieAvatar address={checkSumAddress} size={23} ensImage={ensAvatar} />
+          <span className="ml-2 mr-1 text-sm font-semibold">
+            {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
+          </span>
+          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onSelect={e => {
+              e.preventDefault();
+              copyAddressToClipboard(checkSumAddress);
+            }}
+            className={selectingNetwork ? "hidden" : ""}
+          >
+            {isAddressCopiedToClipboard ? (
+              <>
+                <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                <span className="whitespace-nowrap">Copied!</span>
+              </>
+            ) : (
+              <>
+                <DocumentDuplicateIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                <span className="whitespace-nowrap">Copy address</span>
+              </>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <DropdownMenuItem className="w-full hover:bg-transparent" onSelect={() => setShowQrCodeModal(true)}>
+              <QrCodeIcon className="h-6 w-4 sm:ml-0" />
+              View QR Code
+            </DropdownMenuItem>
+          </DropdownMenuItem>
+          <DropdownMenuItem className={selectingNetwork ? "hidden" : ""}>
+            <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <a target="_blank" href={blockExplorerAddressLink} rel="noopener noreferrer" className="whitespace-nowrap">
+              View on Block Explorer
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {allowedNetworks.length > 1 ? (
+            <DropdownMenuGroup>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger
+                  className="text-sm"
+                  // onSelect={() => {
+                  //   setSelectingNetwork(true);
+                  // }}
+                >
+                  <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
+                  Switch Network
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="mr-2">
+                    <NetworkOptions />
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            </DropdownMenuGroup>
+          ) : null}
+
+          <DropdownMenuItem onSelect={handleDisconnect} className={selectingNetwork ? "hidden" : ""}>
+            <SquareArrowLeft className="h-6 w-4 ml-2 sm:ml-0" /> Disconnect
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AddressQRCodeModal address={address} onOpenChange={setShowQrCodeModal} open={showQrCodeModal} />
     </>
   );
 };
