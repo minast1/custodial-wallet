@@ -153,7 +153,7 @@ export const AddressInfoDropdown = ({
           </span>
           <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="shadow-xl" onCloseAutoFocus={e => e.preventDefault()}>
           <DropdownMenuItem
             onSelect={e => {
               e.preventDefault();

@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Loader from "./loader";
 import {
   ArrowLeftRight,
-  Coins,
+  CirclePoundSterling,
   History,
   Image,
   Link2,
@@ -29,7 +29,7 @@ import { cn } from "~~/lib/utils";
 
 const navItems = [
   { name: "Dashboard", path: "/dashboard", icon: Wallet },
-  { name: "Tokens", path: "/tokens", icon: Coins },
+  { name: "Tokens", path: "/dashboard/tokens", icon: CirclePoundSterling },
   { name: "Transfers", path: "/transfers", icon: ArrowLeftRight },
   { name: "History", path: "/history", icon: History },
   { name: "NFTs", path: "/nfts", icon: Image },
@@ -85,7 +85,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
               href={item.path}
               className={cn(
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium`,
-                pathname.includes(item.path) ? `bg-primary text-primary-foreground shadow-lg` : `hover:bg-accent/30`,
+                pathname === item.path ? `bg-primary text-primary-foreground shadow-lg` : `hover:bg-accent/30`,
               )}
             >
               <item.icon className="w-5 h-5" />
