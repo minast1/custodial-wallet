@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { ArrowDownRight, ArrowUpRight, ClipboardClock, Trash2 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ClipboardClock, RefreshCcw, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "~~/components/ui/avatar";
 import { Badge } from "~~/components/ui/badge";
 import { Button } from "~~/components/ui/button";
@@ -10,8 +10,6 @@ import { useTransactionHistory } from "~~/hooks/useTransactionHistory";
 import timeAgo from "~~/utils/format-time";
 
 const TransactionHistory = () => {
-  // const { address } = useAccount();
-  // const [loading, setLoading] = useState(true);
   const { txs, isFetching } = useTransactionHistory({ limit: 3 });
 
   // console.log(txs);
@@ -76,19 +74,23 @@ const TransactionHistory = () => {
                 >
                   <AvatarFallback
                     className={`${
-                      tx.status === "confirmed"
-                        ? "bg-success/10"
-                        : tx.status === "pending"
-                          ? "bg-secondary/10"
-                          : "bg-destructive/10"
+                      tx.category === "received"
+                        ? "bg-success/20 "
+                        : tx.category === "pending"
+                          ? "bg-secondary/20"
+                          : tx.category === "sent"
+                            ? "bg-destructive/20"
+                            : "bg-primary/10"
                     }`}
                   >
-                    {tx.status === "confirmed" ? (
-                      <ArrowDownRight className="w-5 h-5" />
-                    ) : tx.status === "pending" ? (
+                    {tx.category === "received" ? (
+                      <ArrowDownRight className="w-5 h-5 text-success" />
+                    ) : tx.category === "pending" ? (
                       <ClipboardClock className="w-5 h-5" />
+                    ) : tx.category === "sent" ? (
+                      <ArrowUpRight className="w-5 h-5 text-destructive" />
                     ) : (
-                      <ArrowUpRight className="w-5 h-5" />
+                      <RefreshCcw className="w-5 h-5 text-primary" />
                     )}
                   </AvatarFallback>
                 </Avatar>

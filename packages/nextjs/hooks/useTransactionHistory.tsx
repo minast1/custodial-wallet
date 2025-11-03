@@ -43,8 +43,8 @@ function inferCategory(tx: any, address: string): string {
 
   if (dexRouters.includes(tx.to?.toLowerCase())) return "swap";
 
-  if (tx.to?.toLowerCase() === address.toLowerCase()) return "receive";
-  if (tx.from?.toLowerCase() === address.toLowerCase()) return "send";
+  if (tx.to?.toLowerCase() === address.toLowerCase()) return "received";
+  if (tx.from?.toLowerCase() === address.toLowerCase()) return "sent";
   return "transfer";
 }
 
@@ -189,10 +189,7 @@ export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
   const rpcUrl = targetNetwork ? EXPLORER_APIS[targetNetwork.id] : EXPLORER_APIS[1];
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(
-    () => ["txHistory", address, targetNetwork, Number(blockNumber), rpcUrl],
-    [address, targetNetwork, blockNumber, rpcUrl],
-  );
+  const queryKey = useMemo(() => ["txHistory", address, targetNetwork, rpcUrl], [address, targetNetwork, rpcUrl]);
 
   const {
     data: txs = [],
@@ -234,7 +231,13 @@ export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
     };
 
     loader();
-  }, [rpcUrl, blockNumber, targetNetwork, isConnected, address, queryClient, queryKey]);
+  }, [rpcUrl, targetNetwork, isConnected, address, queryClient, queryKey]);
+
+  //another useEffect to invalidate the query
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blockNumber, queryClient]);
 
   return {
     txs,
