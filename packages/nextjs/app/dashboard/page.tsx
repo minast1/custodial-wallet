@@ -19,8 +19,10 @@ const DashboardPage: NextPage = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back to your crypto portfolio</p>
+        <h1 className="text-3xl font-bold mb-2">Welcome to your Web3 Wallet</h1>
+        <p className="text-muted-foreground">
+          Manage your crypto assets, make transfers and track your transaction history in one place{" "}
+        </p>
       </div>
 
       {/* Balance Card */}
