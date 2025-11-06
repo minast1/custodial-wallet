@@ -9,25 +9,9 @@ import { Input } from "~~/components/ui/input";
 import { useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { getTokenIcon } from "~~/utils/get-tokenicon";
 
-// const mockTokens = [
-//   { name: "Ethereum", symbol: "ETH", balance: "2.547", value: "$4,892.36", change: "+2.92%", positive: true },
-//   { name: "USD Coin", symbol: "USDC", balance: "1,250.00", value: "$1,250.00", change: "+0.01%", positive: true },
-//   { name: "Chainlink", symbol: "LINK", balance: "125.40", value: "$892.85", change: "-1.24%", positive: false },
-//   { name: "Uniswap", symbol: "UNI", balance: "45.20", value: "$315.40", change: "+5.67%", positive: true },
-//   { name: "Aave", symbol: "AAVE", balance: "8.50", value: "$765.00", change: "+3.21%", positive: true },
-// ];
-
 const TokensPage: NextPage = () => {
   const [search, setSearch] = useState("");
   const { tokenData } = useGetTokenBalances();
-  //  const [tokens, setTokens] = useState(tokenData.tokens);
-  //  useEffect(() => {
-  //    first
-
-  //    return () => {
-  //      second
-  //    }
-  //  }, [tokenData])
 
   const filteredTokens = tokenData.tokens.filter(
     token =>
@@ -37,7 +21,9 @@ const TokensPage: NextPage = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Tokens</h1>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
+          Tokens
+        </h1>
         <p className="text-muted-foreground">Manage your cryptocurrency portfolio</p>
       </div>
 

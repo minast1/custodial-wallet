@@ -68,7 +68,7 @@ async function fetchConfirmedTxs(limit: number, rpcUrl: string, address: string)
         ...filter,
         category: ["external", "erc20", "erc721", "erc1155", "internal"],
         order: "desc",
-        maxCount: `0x${limit.toString(16)}`,
+        //maxCount: `0x${limit.toString(16)}`,
         excludeZeroValue: false,
         withMetadata: true,
       },
@@ -189,11 +189,15 @@ export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
   const rpcUrl = targetNetwork ? EXPLORER_APIS[targetNetwork.id] : EXPLORER_APIS[1];
   const queryClient = useQueryClient();
 
-  const queryKey = useMemo(() => ["txHistory", address, targetNetwork, rpcUrl], [address, targetNetwork, rpcUrl]);
+  const queryKey = useMemo(
+    () => ["txHistory", address, targetNetwork, rpcUrl, limit],
+    [address, targetNetwork, rpcUrl, limit],
+  );
 
   const {
     data: txs = [],
     isFetching,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -242,6 +246,7 @@ export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
   return {
     txs,
     isFetching,
+    isLoading,
     isError,
     refetch,
   };

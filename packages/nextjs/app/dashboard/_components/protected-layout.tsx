@@ -30,10 +30,10 @@ import { cn } from "~~/lib/utils";
 const navItems = [
   { name: "Dashboard", path: "/dashboard", icon: Wallet },
   { name: "Tokens", path: "/dashboard/tokens", icon: CirclePoundSterling },
-  { name: "Transfers", path: "/transfers", icon: ArrowLeftRight },
-  { name: "History", path: "/history", icon: History },
-  { name: "NFTs", path: "/nfts", icon: Image },
-  { name: "Settings", path: "/settings", icon: Settings },
+  { name: "Transfers", path: "/dashboard/transfers", icon: ArrowLeftRight },
+  { name: "History", path: "/dashboard/history", icon: History },
+  { name: "NFTs", path: "/dashboard/nfts", icon: Image },
+  { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {

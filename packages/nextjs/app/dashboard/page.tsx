@@ -19,7 +19,9 @@ const DashboardPage: NextPage = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Welcome to your Web3 Wallet</h1>
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
+          Welcome to your Web3 Wallet
+        </h1>
         <p className="text-muted-foreground">
           Manage your crypto assets, make transfers and track your transaction history in one place{" "}
         </p>
