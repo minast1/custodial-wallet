@@ -18,7 +18,7 @@ import { Switch } from "~~/components/ui/switch";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { NativeBalanceType, TokenData, useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { useBatchApproveAndTransfer } from "~~/hooks/transfers/useBatchApproveAndTransfer";
-import useBatchTxStatus from "~~/hooks/transfers/useBatchTxStatus";
+//import useBatchTxStatus from "~~/hooks/transfers/useBatchTxStatus";
 import { useSingleApproveAndTransfer } from "~~/hooks/transfers/useSingleApproveAndTransfer";
 import { createTransferSchema } from "~~/lib/schema";
 import { getTokenIcon } from "~~/utils/get-tokenicon";
@@ -31,17 +31,11 @@ type TProps = {
 
 const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) => {
   const [isBatchTransferMode, setIsBatchTransferMode] = useState(false);
-  const { executeBatch, data: batchTx } = useBatchApproveAndTransfer();
+  const { executeBatch, isPending: isBatchPending } = useBatchApproveAndTransfer();
   const { executeSingle, isPending } = useSingleApproveAndTransfer();
   const { targetNetwork } = useTargetNetwork();
   const queryClient = useQueryClient();
-  const { data: batchTxStatus } = useBatchTxStatus(batchTx?.id);
-
-  useEffect(() => {
-    if (batchTxStatus?.status === "success") {
-      queryClient.invalidateQueries({ queryKey: ["tokenBalances", address, targetNetwork.id, nativeBalance] });
-    }
-  }, [address, batchTxStatus, targetNetwork.id, queryClient, nativeBalance]);
+  //const { isLoading: isBatchTxStatusLoading } = useBatchTxStatus(batchTx?.id);
 
   const { tokenData, isLoading: isLoadingTokenData } = useGetTokenBalances(nativeBalance);
 
@@ -61,9 +55,12 @@ const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) =>
         },
         {
           onSuccess: () => {
-            // queryClient.invalidateQueries({ queryKey: ["tokenBalances", address, targetNetwork.id] });
+            queryClient.invalidateQueries({ queryKey: ["tokenBalances", address, targetNetwork.id, nativeBalance] });
             reset();
           },
+          // onError: err => {
+          //   console.log(err);
+          // },
         },
       );
     } else {
@@ -104,6 +101,7 @@ const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) =>
     },
   });
 
+  // Reset token balace after invalidation && setting default selected token
   useEffect(() => {
     if (!tokenData?.tokens?.length) return;
 
@@ -350,7 +348,11 @@ const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) =>
               className="w-full h-12 crypto-gradient text-primary-foreground text-base font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
               // onClick={handleSend}
             >
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-5 h-5 mr-2" />}
+              {isPending || isBatchPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5 mr-2" />
+              )}
 
               {isBatchTransferMode
                 ? `Send Batch Transaction (${fields.length} ${fields.length === 1 ? "Recipient" : "Recipients"})`

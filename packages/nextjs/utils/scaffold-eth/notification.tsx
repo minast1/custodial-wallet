@@ -86,7 +86,7 @@ export const notification = {
     return Notification({ content, status: "warning", ...options });
   },
   error: (content: React.ReactNode, options?: NotificationOptions) => {
-    return Notification({ content, status: "error", ...options });
+    return Notification({ content, status: "error", className: "bg-destructive/20 border-destructive/50", ...options });
   },
   loading: (content: React.ReactNode, options?: NotificationOptions) => {
     return Notification({ content, status: "loading", className: "bg-primary/20 border-primary/50", ...options });

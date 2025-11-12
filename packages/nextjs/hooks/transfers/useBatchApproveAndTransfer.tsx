@@ -1,11 +1,14 @@
 "use client";
 
 //import { useTargetNetwork } from "../scaffold-eth";
+import { TxnNotification } from "../scaffold-eth";
 import { useGetWalletCapabilities } from "./useGetWalletCapabilities";
 import { useMutation } from "@tanstack/react-query";
-import { type Address, type Hex, encodeFunctionData, erc20Abi, parseUnits } from "viem";
+import { type Address, encodeFunctionData, erc20Abi, parseUnits } from "viem";
 import { useAccount } from "wagmi";
-import { queryClient } from "~~/components/ScaffoldEthAppWithProviders";
+//import { queryClient } from "~~/components/ScaffoldEthAppWithProviders";
+import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
+import { getParsedErrorWithAllAbis } from "~~/utils/scaffold-eth/contract";
 
 //import { notification } from "~~/utils/scaffold-eth";
 
@@ -31,11 +34,12 @@ interface BatchAction {
 interface BatchTxResponse {
   id: string;
   chainId: number;
-  calls: {
-    to: Address;
-    value?: bigint;
-    data: Hex;
-  }[];
+  status: "success" | "pending" | "failure" | undefined;
+  // calls: {
+  //   to: Address;
+  //   value?: bigint;
+  //   data: Hex;
+  // }[];
 }
 
 // interface MutationFunctionContext {
@@ -48,6 +52,9 @@ export function useBatchApproveAndTransfer() {
 
   const mutation = useMutation<BatchTxResponse, Error, BatchAction>({
     mutationFn: async ({ approvals = [], transfers = [] }) => {
+      let notificationId = null;
+      let blockExplorerTxURL = "";
+
       if (!walletClient || !address) {
         throw new Error("Wallet client not connected");
         // notification.error("No wallet connected", { position: "top-right" });
@@ -105,24 +112,58 @@ export function useBatchApproveAndTransfer() {
 
       if (!calls.length) {
         throw new Error("No calls to execute");
-        // notification.error("No calls to execute", { position: "top-right" });
-        // return {
-        //   id: "",
-        //   chainId: 1,
-        //   calls,
-        // } as BatchTxResponse;
-        //throw new Error("No calls to execute")
       }
+      try {
+        //notificationId = notification.loading(<TxnNotification message="Awaiting user confirmation.." />);
+        //Send atomic batch with EIP-5792
+        const { id } = await walletClient.sendCalls({
+          account: address,
+          calls,
+        });
 
-      //Send atomic batch with EIP-5792
-      const { id } = await walletClient.sendCalls({
-        account: address,
-        calls,
-      });
-      return { id } as BatchTxResponse;
-    },
-    onSuccess: ({ id, chainId }) => {
-      queryClient.invalidateQueries({ queryKey: ["batachTxStatus", id, chainId] });
+        //notification.remove(notificationId);
+
+        notificationId = notification.loading(<TxnNotification message="Transaction confirmation in progress" />);
+        const result = await walletClient.waitForCallsStatus({ id });
+        notification.remove(notificationId);
+
+        if (result.status === "success") {
+          const transactionHash = result.receipts?.at(0)?.transactionHash;
+          blockExplorerTxURL = result.chainId
+            ? getBlockExplorerTxLink(result.chainId, transactionHash as `0x${string}`)
+            : "";
+          notification.remove(notificationId);
+          notification.success(
+            <TxnNotification message="Transaction completed successfully!" blockExplorerLink={blockExplorerTxURL} />,
+            {
+              icon: "🎉",
+            },
+          );
+        }
+
+        if (result.status === "failure" || result.status === undefined) {
+          notification.error(<TxnNotification message="Transaction failed!" blockExplorerLink={blockExplorerTxURL} />, {
+            icon: "🎉",
+          });
+          throw new Error(result.status);
+        }
+
+        return { id, status: result.status, chainId: result.chainId };
+      } catch (error: any) {
+        if (notificationId) {
+          notification.remove(notificationId);
+        }
+        console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
+        const message = getParsedErrorWithAllAbis(error, 1);
+
+        if (message.includes("No matching bundle found")) {
+          notification.error(<TxnNotification message={"Transaction was rejected by user.."} />);
+        } else {
+          notification.error(<TxnNotification message={message} />);
+        }
+
+        throw error;
+      }
     },
   });
 

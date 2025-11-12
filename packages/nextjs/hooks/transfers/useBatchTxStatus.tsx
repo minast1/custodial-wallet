@@ -24,14 +24,11 @@ const useBatchTxStatus = (id: string | undefined) => {
       let transactionStatus: "success" | "pending" | "failure" | undefined;
       let chainId: number = scaffoldConfig.targetNetworks[0].id;
       try {
-        notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
+        notificationId = notification.loading(<TxnNotification message="Waiting for transaction to complete." />);
         const result = await walletClient.waitForCallsStatus({ id });
         transactionStatus = result.status;
         chainId = result.chainId;
-        notification.remove(notificationId);
-        if (transactionStatus === "pending") {
-          notificationId = notification.loading(<TxnNotification message="Waiting for transaction to complete." />);
-        }
+
         if (result.status === "success") {
           notification.remove(notificationId);
           notification.success(<TxnNotification message="Transaction completed successfully!" />, {
