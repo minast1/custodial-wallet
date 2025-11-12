@@ -4,12 +4,22 @@ import { useDebounceValue } from "usehooks-ts";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
-import { CommonInputProps, InputBase, isENS } from "~~/components/scaffold-eth";
+import { isENS } from "~~/components/scaffold-eth";
+//import { Input } from "~~/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
 
 /**
  * Address input with ENS name resolution
  */
-export const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonInputProps<Address | string>) => {
+type TProps = {
+  className?: string;
+  value: Address | string;
+  onChange?: (newValue: Address | string) => void;
+  name?: string;
+  placeholder?: string;
+  disabled?: boolean;
+};
+export const AddressInput = ({ value, name, placeholder, disabled, className }: TProps) => {
   // Debounce the input to keep clean RPC calls when resolving ENS names
   // If the input is an address, we don't need to debounce it
   const [_debouncedValue] = useDebounceValue(value, 500);
@@ -22,7 +32,7 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
   const {
     data: ensAddress,
     isLoading: isEnsAddressLoading,
-    isError: isEnsAddressError,
+    //isError: isEnsAddressError,
   } = useEnsAddress({
     name: settledValue,
     chainId: 1,
@@ -36,7 +46,7 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
   const {
     data: ensName,
     isLoading: isEnsNameLoading,
-    isError: isEnsNameError,
+    // isError: isEnsNameError,
   } = useEnsName({
     address: settledValue as Address,
     chainId: 1,
@@ -61,26 +71,26 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
 
     // ENS resolved successfully
     setEnteredEnsName(debouncedValue);
-    onChange(ensAddress);
-  }, [ensAddress, onChange, debouncedValue]);
+    //onChange(ensAddress);
+  }, [ensAddress, debouncedValue]);
 
   useEffect(() => {
     setEnteredEnsName(undefined);
   }, [value]);
 
-  const reFocus = isEnsAddressError || isEnsNameError || ensName === null || ensAddress === null;
+  // const reFocus = isEnsAddressError || isEnsNameError || ensName === null || ensAddress === null;
 
   return (
-    <InputBase<Address>
-      name={name}
-      placeholder={placeholder}
-      error={ensAddress === null}
-      value={value as Address}
-      onChange={onChange}
-      disabled={isEnsAddressLoading || isEnsNameLoading || disabled}
-      reFocus={reFocus}
-      prefix={
-        ensName ? (
+    <InputGroup className={className}>
+      <InputGroupInput
+        placeholder={placeholder}
+        name={name}
+        value={value as Address}
+        // onChange={() => onChange}
+        disabled={isEnsAddressLoading || isEnsNameLoading || disabled}
+      />
+      <InputGroupAddon>
+        {ensName ? (
           <div className="flex bg-base-300 rounded-l-full items-center">
             {isEnsAvatarLoading && <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>}
             {ensAvatar ? (
@@ -100,13 +110,48 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
               <div className="skeleton bg-base-200 h-3 w-20"></div>
             </div>
           )
-        )
-      }
-      suffix={
-        // Don't want to use nextJS Image here (and adding remote patterns for the URL)
-        // eslint-disable-next-line @next/next/no-img-element
-        value && <img alt="" className="rounded-full!" src={blo(value as `0x${string}`)} width="35" height="35" />
-      }
-    />
+        )}
+      </InputGroupAddon>
+      <InputGroupAddon align="inline-end">
+        {
+          // Don't want to use nextJS Image here (and adding remote patterns for the URL)
+          // eslint-disable-next-line @next/next/no-img-element
+          value && <img alt="" className="rounded-full!" src={blo(value as `0x${string}`)} width="35" height="35" />
+        }
+      </InputGroupAddon>
+    </InputGroup>
   );
+  //     error={ensAddress === null}
+
+  //     reFocus={reFocus}
+  //     prefix={
+  //       ensName ? (
+  //         <div className="flex bg-base-300 rounded-l-full items-center">
+  //           {isEnsAvatarLoading && <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>}
+  //           {ensAvatar ? (
+  //             <span className="w-[35px]">
+  //               {
+  //                 // eslint-disable-next-line
+  //                 <img className="w-full rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />
+  //               }
+  //             </span>
+  //           ) : null}
+  //           <span className="text-accent px-2">{enteredEnsName ?? ensName}</span>
+  //         </div>
+  //       ) : (
+  //         (isEnsNameLoading || isEnsAddressLoading) && (
+  //           <div className="flex bg-base-300 rounded-l-full items-center gap-2 pr-2">
+  //             <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>
+  //             <div className="skeleton bg-base-200 h-3 w-20"></div>
+  //           </div>
+  //         )
+  //       )
+  //     }
+  //     suffix={
+  //       // Don't want to use nextJS Image here (and adding remote patterns for the URL)
+  //       // eslint-disable-next-line @next/next/no-img-element
+  //       value && <img alt="" className="rounded-full!" src={blo(value as `0x${string}`)} width="35" height="35" />
+  //     }
+  //   />
+  // );
 };

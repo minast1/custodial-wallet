@@ -36,6 +36,7 @@ export const useGetWalletCapabilities = () => {
     isFetching,
     isReady,
     isSupported,
+    walletClient,
     supportsAtomicActions: isReady || isSupported,
   };
 };

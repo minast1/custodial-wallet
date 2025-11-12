@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatUnits } from "viem";
-import { useAccount, useBlockNumber } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { formatEther, formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 //import scaffoldConfig from "~~/scaffold.config";
 import { EXPLORER_APIS } from "~~/utils/explorer-apis";
@@ -15,7 +14,7 @@ interface TokenBalance {
   tokenBalance: string;
 }
 
-interface TokenData {
+export interface TokenData {
   address: string;
   symbol: string;
   name: string;
@@ -26,23 +25,28 @@ interface TokenData {
   percentage_change_24h: number;
 }
 
-//const { alchemyApiKey } = scaffoldConfig;
-export const useGetTokenBalances = () => {
-  const { address, isConnected } = useAccount();
-  const { targetNetwork } = useTargetNetwork();
-  const { data: blockNumber } = useBlockNumber({ watch: true, chainId: targetNetwork.id });
-  const rpcUrl = targetNetwork ? EXPLORER_APIS[targetNetwork.id] : EXPLORER_APIS[1];
+export interface NativeBalanceType {
+  decimals: number;
+  formatted: string;
+  symbol: string;
+  value: bigint;
+}
 
-  const queryClient = useQueryClient();
-  const queryKey = useMemo(() => ["tokenBalances", address, targetNetwork.id], [address, targetNetwork.id]);
+//const { alchemyApiKey } = scaffoldConfig;
+export const useGetTokenBalances = (nativeBalance: NativeBalanceType | undefined) => {
+  const { address } = useAccount();
+  const { targetNetwork } = useTargetNetwork();
+  // const { data: blockNumber } = useBlockNumber({ watch: true, chainId: targetNetwork.id });
+  const rpcUrl = targetNetwork ? EXPLORER_APIS[targetNetwork.id] : EXPLORER_APIS[1];
 
   const {
     data: tokenData = { tokens: [], totalUsdValue: 0 },
     isFetching,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey,
+    queryKey: ["tokenBalances", address, targetNetwork.id, nativeBalance?.value?.toString()],
     queryFn: async () => {
       if (!address) return { tokens: [], totalUsdValue: 0 };
 
@@ -58,7 +62,9 @@ export const useGetTokenBalances = () => {
       });
 
       const tokenBalancesData = await tokenBalancesRes.json();
+
       const balances: TokenBalance[] = tokenBalancesData?.result?.tokenBalances || [];
+
       const nonZeroBalances = balances.filter(b => b.tokenBalance !== "0x0");
 
       //Get token metadata (symbol, decimals, etc.)
@@ -76,6 +82,7 @@ export const useGetTokenBalances = () => {
           });
 
           const metaJson = await metaRes.json();
+
           return {
             address: token.contractAddress,
             symbol: metaJson.result?.symbol || "UNKNOWN",
@@ -86,7 +93,19 @@ export const useGetTokenBalances = () => {
         }),
       );
 
-      const symbols = tokenMetadata.map(t => t.symbol).filter(Boolean);
+      //Inject native Eth manually
+      const nativeEthBalance = nativeBalance?.value ? parseFloat(formatEther(nativeBalance.value)) : 0;
+      const nativeEthToken: TokenData = {
+        address: "native",
+        symbol: targetNetwork.nativeCurrency.symbol || "ETH",
+        name: targetNetwork.nativeCurrency.name || "Ethereum",
+        decimals: targetNetwork.nativeCurrency.decimals || 18,
+        balance: nativeEthBalance,
+        percentage_change_24h: 0,
+      };
+
+      const symbols = [nativeEthToken.symbol, ...tokenMetadata.map(t => t.symbol).filter(Boolean)];
+
       /// const symbolJson = JSON.stringify(symbols);
       if (!symbols.length) return { tokens: [], totalUsdValue: 0 };
       const params = new URLSearchParams({ symbols: symbols.join(",") });
@@ -98,7 +117,7 @@ export const useGetTokenBalances = () => {
       const pricesData = pricesJson?.data.data || [];
 
       //Map prices to tokens
-      const tokensWithPrices: TokenData[] = tokenMetadata.map(token => {
+      const tokensWithPrices: TokenData[] = [nativeEthToken, ...tokenMetadata].map(token => {
         const usdPrice = pricesData[token.symbol]?.[0]?.quote?.USD?.price || 0;
 
         const usdValue = usdPrice * token.balance;
@@ -110,33 +129,37 @@ export const useGetTokenBalances = () => {
       const totalUsdValue = tokensWithPrices.reduce((sum, t) => sum + (t.usdValue || 0), 0);
 
       return {
-        tokens: tokensWithPrices,
+        tokens: [...tokensWithPrices],
         totalUsdValue, //tokens.reduce((acc, t) => acc +  0), 0),
       };
     },
-    refetchOnWindowFocus: false,
-    staleTime: 30 * 60 * 1000,
+    // refetchOnWindowFocus: false,
+    // retry: false,
+    // refetchIntervalInBackground: false,
+
+    staleTime: 30 * 60 * 1000, //
   });
 
-  useEffect(() => {
-    const loader = async () => {
-      if (isConnected && address) {
-        await queryClient.ensureQueryData({ queryKey });
-      }
-    };
+  // useEffect(() => {
+  //   if (nativeBalance?.value) {
+  //     refetch();
+  //   }
+  // }, [nativeBalance?.value, refetch]);
 
-    loader();
-  }, [rpcUrl, targetNetwork, isConnected, address, queryClient, queryKey]);
+  // useEffect(() => {
+  //   const loader = async () => {
+  //     if (isConnected && address) {
+  //       await queryClient.ensureQueryData({ queryKey: ["tokenBalances", address, targetNetwork.id] });
+  //     }
+  //   };
 
-  //another useEffect to invalidate the query
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockNumber, queryClient]);
+  //   loader();
+  // }, [rpcUrl, targetNetwork, isConnected, address]);
 
   return {
     tokenData,
     isFetching,
+    isLoading,
     isError,
     refetch,
   };

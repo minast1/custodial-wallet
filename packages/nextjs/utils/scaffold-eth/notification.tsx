@@ -1,4 +1,6 @@
 import React from "react";
+import clsx from "clsx";
+import { Loader2 } from "lucide-react";
 import { Toast, ToastPosition, toast } from "react-hot-toast";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import {
@@ -14,19 +16,21 @@ type NotificationProps = {
   duration?: number;
   icon?: string;
   position?: ToastPosition;
+  className?: string;
 };
 
 type NotificationOptions = {
   duration?: number;
   icon?: string;
   position?: ToastPosition;
+  className?: string;
 };
 
 const ENUM_STATUSES = {
   success: <CheckCircleIcon className="w-7 text-success" />,
-  loading: <span className="w-6 loading loading-spinner"></span>,
-  error: <ExclamationCircleIcon className="w-7 text-error" />,
-  info: <InformationCircleIcon className="w-7 text-info" />,
+  loading: <Loader2 className="w-6 animate-spin text-primary/80" />,
+  error: <ExclamationCircleIcon className="w-7 text-destructive" />,
+  info: <InformationCircleIcon className="w-7 text-blue-400" />,
   warning: <ExclamationTriangleIcon className="w-7 text-warning" />,
 };
 
@@ -42,16 +46,19 @@ const Notification = ({
   duration = DEFAULT_DURATION,
   icon,
   position = DEFAULT_POSITION,
+  className,
 }: NotificationProps) => {
   return toast.custom(
     (t: Toast) => (
       <div
-        className={`flex flex-row items-start justify-between max-w-sm rounded-xl shadow-center shadow-accent bg-base-200 p-4 transform-gpu relative transition-all duration-500 ease-in-out space-x-2
-        ${
+        className={clsx(
+          "flex flex-row items-start justify-between max-w-sm rounded-xl border-2 shadow-center shadow-2xl glass-card p-4 transform-gpu relative transition-all duration-500 ease-in-out space-x-2",
+
           position.substring(0, 3) == "top"
             ? `hover:translate-y-1 ${t.visible ? "top-0" : "-top-96"}`
-            : `hover:-translate-y-1 ${t.visible ? "bottom-0" : "-bottom-96"}`
-        }`}
+            : `hover:-translate-y-1 ${t.visible ? "bottom-0" : "-bottom-96"}`,
+          className,
+        )}
       >
         <div className="leading-[0] self-center">{icon ? icon : ENUM_STATUSES[status]}</div>
         <div className={`overflow-x-hidden break-words whitespace-pre-line ${icon ? "mt-1" : ""}`}>{content}</div>
@@ -70,7 +77,7 @@ const Notification = ({
 
 export const notification = {
   success: (content: React.ReactNode, options?: NotificationOptions) => {
-    return Notification({ content, status: "success", ...options });
+    return Notification({ content, status: "success", className: "bg-success/20 border-success/50", ...options });
   },
   info: (content: React.ReactNode, options?: NotificationOptions) => {
     return Notification({ content, status: "info", ...options });
@@ -82,7 +89,7 @@ export const notification = {
     return Notification({ content, status: "error", ...options });
   },
   loading: (content: React.ReactNode, options?: NotificationOptions) => {
-    return Notification({ content, status: "loading", ...options });
+    return Notification({ content, status: "loading", className: "bg-primary/20 border-primary/50", ...options });
   },
   remove: (toastId: string) => {
     toast.remove(toastId);

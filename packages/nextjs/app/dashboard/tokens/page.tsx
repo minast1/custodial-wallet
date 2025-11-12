@@ -3,15 +3,25 @@
 import { useState } from "react";
 import { Search, TrendingDown, TrendingUp } from "lucide-react";
 import { NextPage } from "next";
+import { useAccount } from "wagmi";
 import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "~~/components/ui/card";
 import { Input } from "~~/components/ui/input";
+import { useTargetNetwork, useWatchBalance } from "~~/hooks/scaffold-eth";
 import { useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { getTokenIcon } from "~~/utils/get-tokenicon";
 
 const TokensPage: NextPage = () => {
   const [search, setSearch] = useState("");
-  const { tokenData } = useGetTokenBalances();
+  const { address, isConnected } = useAccount();
+
+  const { targetNetwork } = useTargetNetwork();
+  const { data: nativeBalance } = useWatchBalance({
+    address,
+    chainId: targetNetwork.id,
+    query: { enabled: !!isConnected },
+  });
+  const { tokenData } = useGetTokenBalances(nativeBalance);
 
   const filteredTokens = tokenData.tokens.filter(
     token =>
@@ -77,7 +87,7 @@ const TokensPage: NextPage = () => {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">
-                    {token.balance} {token.symbol}
+                    {!Number.isInteger(token.balance) ? token.balance.toFixed(4) : token.balance} {token.symbol}
                   </p>
                   <p className="text-sm text-muted-foreground">${token.usdValue?.toFixed(2)}</p>
                 </div>
