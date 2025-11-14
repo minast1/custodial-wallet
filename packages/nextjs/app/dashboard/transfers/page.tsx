@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Approvals from "./_components/approvals";
 import Swaps from "./_components/swaps";
 import Transfers from "./_components/transfers";
 //import BatchTxsIndicatorBadge from "./_components/batchtransactions-indicatorbadge";
-import { AlertCircleIcon, Coins, DollarSign, Link2, Plus, Search, Send, ShieldCheck, Sparkles, X } from "lucide-react";
+import { AlertCircleIcon, Coins, DollarSign, Link2, Search, Send, ShieldCheck, Sparkles } from "lucide-react";
 import { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { Alert, AlertDescription, AlertTitle } from "~~/components/ui/alert";
@@ -26,13 +27,13 @@ const tokens = [
   { symbol: "UNI", name: "Uniswap", icon: Sparkles, color: "text-pink-400" },
 ];
 
-interface BatchSpender {
-  id: string;
-  token: string;
-  address: string;
-  amount: string;
-  isUnlimited: boolean;
-}
+// interface BatchSpender {
+//   id: string;
+//   token: string;
+//   address: string;
+//   amount: string;
+//   isUnlimited: boolean;
+// }
 
 const TransfersPage: NextPage = () => {
   // Batch mode toggles
@@ -46,15 +47,15 @@ const TransfersPage: NextPage = () => {
     query: { enabled: !!isConnected },
   });
   // Approval states
-  const [approvalToken, setApprovalToken] = useState("ETH");
-  const [approvalAddress, setApprovalAddress] = useState("");
-  const [approvalAmount, setApprovalAmount] = useState("");
-  const [isUnlimited, setIsUnlimited] = useState(false);
+  // const [approvalToken, setApprovalToken] = useState("ETH");
+  // const [approvalAddress, setApprovalAddress] = useState("");
+  // const [approvalAmount, setApprovalAmount] = useState("");
+  // const [isUnlimited, setIsUnlimited] = useState(false);
 
   // Batch approval states
-  const [batchSpenders, setBatchSpenders] = useState<BatchSpender[]>([
-    { id: "1", token: "ETH", address: "", amount: "", isUnlimited: false },
-  ]);
+  // const [batchSpenders, setBatchSpenders] = useState<BatchSpender[]>([
+  //   { id: "1", token: "ETH", address: "", amount: "", isUnlimited: false },
+  // ]);
 
   // Check allowance states
   const [checkToken, setCheckToken] = useState("ETH");
@@ -70,17 +71,17 @@ const TransfersPage: NextPage = () => {
 
   // Mock exchange rate calculation
 
-  const handleApprove = () => {
-    if (!approvalAddress || (!approvalAmount && !isUnlimited)) {
-      //toast.error("Please fill in all fields");
-      return;
-    }
-    // const amount = isUnlimited ? "unlimited" : `${approvalAmount} ${approvalToken}`;
-    //toast.success(`Approved ${amount} spending for ${approvalAddress.slice(0, 6)}...${approvalAddress.slice(-4)}`);
-    setApprovalAddress("");
-    setApprovalAmount("");
-    setIsUnlimited(false);
-  };
+  // const handleApprove = () => {
+  //   if (!approvalAddress || (!approvalAmount && !isUnlimited)) {
+  //     //toast.error("Please fill in all fields");
+  //     return;
+  //   }
+  //   // const amount = isUnlimited ? "unlimited" : `${approvalAmount} ${approvalToken}`;
+  //   //toast.success(`Approved ${amount} spending for ${approvalAddress.slice(0, 6)}...${approvalAddress.slice(-4)}`);
+  //   setApprovalAddress("");
+  //   setApprovalAmount("");
+  //   setIsUnlimited(false);
+  // };
 
   const handleCheckAllowance = () => {
     if (!checkContract) {
@@ -98,38 +99,38 @@ const TransfersPage: NextPage = () => {
   };
 
   // Batch approval functions
-  const addSpender = () => {
-    setBatchSpenders([
-      ...batchSpenders,
-      {
-        id: Date.now().toString(),
-        token: "ETH",
-        address: "",
-        amount: "",
-        isUnlimited: false,
-      },
-    ]);
-  };
+  // const addSpender = () => {
+  //   setBatchSpenders([
+  //     ...batchSpenders,
+  //     {
+  //       id: Date.now().toString(),
+  //       token: "ETH",
+  //       address: "",
+  //       amount: "",
+  //       isUnlimited: false,
+  //     },
+  //   ]);
+  // };
 
-  const removeSpender = (id: string) => {
-    if (batchSpenders.length > 1) {
-      setBatchSpenders(batchSpenders.filter(s => s.id !== id));
-    }
-  };
+  // const removeSpender = (id: string) => {
+  //   if (batchSpenders.length > 1) {
+  //     setBatchSpenders(batchSpenders.filter(s => s.id !== id));
+  //   }
+  // };
 
-  const updateSpender = (id: string, field: keyof BatchSpender, value: string | boolean) => {
-    setBatchSpenders(batchSpenders.map(s => (s.id === id ? { ...s, [field]: value } : s)));
-  };
+  // const updateSpender = (id: string, field: keyof BatchSpender, value: string | boolean) => {
+  //   setBatchSpenders(batchSpenders.map(s => (s.id === id ? { ...s, [field]: value } : s)));
+  // };
 
-  const handleBatchApprove = () => {
-    const hasEmptyFields = batchSpenders.some(s => !s.address || (!s.amount && !s.isUnlimited));
-    if (hasEmptyFields) {
-      //toast.error("Please fill in all spender fields");
-      return;
-    }
-    //toast.success(`Batch approval for ${batchSpenders.length} spender(s) across multiple tokens submitted`);
-    setBatchSpenders([{ id: "1", token: "ETH", address: "", amount: "", isUnlimited: false }]);
-  };
+  // const handleBatchApprove = () => {
+  //   const hasEmptyFields = batchSpenders.some(s => !s.address || (!s.amount && !s.isUnlimited));
+  //   if (hasEmptyFields) {
+  //     //toast.error("Please fill in all spender fields");
+  //     return;
+  //   }
+  //   //toast.success(`Batch approval for ${batchSpenders.length} spender(s) across multiple tokens submitted`);
+  //   setBatchSpenders([{ id: "1", token: "ETH", address: "", amount: "", isUnlimited: false }]);
+  // };
 
   // Approve and Send function
   const handleApproveAndSend = () => {
@@ -196,230 +197,11 @@ const TransfersPage: NextPage = () => {
               </div>
             </div>
           </CardHeader>
+
           <CardContent>
             <div className="grid gap-8 lg:grid-cols-2">
               {/* Approve Spending */}
-              <div className="space-y-5">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                  Approve Spending {isBatchApprovalMode && "(Batch)"}
-                </h3>
-
-                {!isBatchApprovalMode ? (
-                  <>
-                    <div className="space-y-3">
-                      <Label className="text-base">Select Token</Label>
-                      <div className="grid grid-cols-4 gap-3">
-                        {tokens.map(t => {
-                          const Icon = t.icon;
-                          return (
-                            <button
-                              key={t.symbol}
-                              onClick={() => setApprovalToken(t.symbol)}
-                              className={`
-                                relative p-4 rounded-xl border-2 transition-all duration-200
-                                flex flex-col items-center justify-center gap-2 group
-                                ${
-                                  approvalToken === t.symbol
-                                    ? "border-primary bg-primary/10 shadow-lg shadow-primary/20"
-                                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                                }
-                              `}
-                            >
-                              <Icon
-                                className={`w-6 h-6 ${approvalToken === t.symbol ? "text-primary" : t.color} transition-colors`}
-                              />
-                              <span
-                                className={`text-xs font-bold ${approvalToken === t.symbol ? "text-primary" : "text-muted-foreground"}`}
-                              >
-                                {t.symbol}
-                              </span>
-                              {approvalToken === t.symbol && (
-                                <div className="absolute inset-0 rounded-xl ring-2 ring-primary animate-pulse" />
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="approvalAddress" className="text-base">
-                        Contract/DEX Address
-                      </Label>
-                      <Input
-                        id="approvalAddress"
-                        placeholder="0x1234...abcd"
-                        className="glass-card font-mono h-12 text-base border-2 focus-visible:border-primary"
-                        value={approvalAddress}
-                        onChange={e => setApprovalAddress(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="approvalAmount" className="text-base">
-                        Approval Amount
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="approvalAmount"
-                          type="number"
-                          placeholder={isUnlimited ? "Unlimited" : "0.00"}
-                          className="glass-card pr-20 h-12 text-lg font-semibold border-2 focus-visible:border-primary"
-                          value={approvalAmount}
-                          onChange={e => setApprovalAmount(e.target.value)}
-                          disabled={isUnlimited}
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base text-primary font-bold">
-                          {approvalToken}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="unlimited"
-                          checked={isUnlimited}
-                          onChange={e => setIsUnlimited(e.target.checked)}
-                          className="w-4 h-4 rounded border-2 border-primary"
-                        />
-                        <Label htmlFor="unlimited" className="text-sm cursor-pointer">
-                          Unlimited approval (not recommended for security)
-                        </Label>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full h-12 crypto-gradient text-primary-foreground text-base font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
-                      onClick={handleApprove}
-                    >
-                      <ShieldCheck className="w-5 h-5 mr-2" />
-                      Approve Spending
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between mb-3">
-                      <Label className="text-base">Spenders ({batchSpenders.length})</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addSpender}
-                        className="glass-card border-2 hover:border-primary hover:bg-primary/10"
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add Spender
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                      {batchSpenders.map((spender, index) => (
-                        <div
-                          key={spender.id}
-                          className="p-4 rounded-xl border-2 border-border/50 bg-muted/20 space-y-3"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-semibold text-primary">Spender #{index + 1}</span>
-                            {batchSpenders.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeSpender(spender.id)}
-                                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-sm">Token</Label>
-                            <div className="grid grid-cols-4 gap-2">
-                              {tokens.map(t => {
-                                const Icon = t.icon;
-                                return (
-                                  <button
-                                    key={t.symbol}
-                                    onClick={() => updateSpender(spender.id, "token", t.symbol)}
-                                    className={`
-                                      p-2 rounded-lg border-2 transition-all duration-200
-                                      flex flex-col items-center justify-center gap-1
-                                      ${
-                                        spender.token === t.symbol
-                                          ? "border-primary bg-primary/10"
-                                          : "border-border/50 hover:border-primary/30"
-                                      }
-                                    `}
-                                  >
-                                    <Icon
-                                      className={`w-4 h-4 ${spender.token === t.symbol ? "text-primary" : t.color}`}
-                                    />
-                                    <span className="text-xs">{t.symbol}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor={`spender-address-${spender.id}`} className="text-sm">
-                              Spender Address
-                            </Label>
-                            <Input
-                              id={`spender-address-${spender.id}`}
-                              placeholder="0x1234...abcd"
-                              className="glass-card font-mono h-10 text-sm border-2 focus-visible:border-primary"
-                              value={spender.address}
-                              onChange={e => updateSpender(spender.id, "address", e.target.value)}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor={`spender-amount-${spender.id}`} className="text-sm">
-                              Approval Amount
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                id={`spender-amount-${spender.id}`}
-                                type="number"
-                                placeholder={spender.isUnlimited ? "Unlimited" : "0.00"}
-                                className="glass-card pr-16 h-10 text-base font-semibold border-2 focus-visible:border-primary"
-                                value={spender.amount}
-                                onChange={e => updateSpender(spender.id, "amount", e.target.value)}
-                                disabled={spender.isUnlimited}
-                              />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-primary font-bold">
-                                {spender.token}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                id={`unlimited-${spender.id}`}
-                                checked={spender.isUnlimited}
-                                onChange={e => updateSpender(spender.id, "isUnlimited", e.target.checked)}
-                                className="w-4 h-4 rounded border-2 border-primary"
-                              />
-                              <Label htmlFor={`unlimited-${spender.id}`} className="text-xs cursor-pointer">
-                                Unlimited
-                              </Label>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <Button
-                      className="w-full h-12 crypto-gradient text-primary-foreground text-base font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all"
-                      onClick={handleBatchApprove}
-                    >
-                      <ShieldCheck className="w-5 h-5 mr-2" />
-                      Approve Batch ({batchSpenders.length} Spender{batchSpenders.length !== 1 ? "s" : ""})
-                    </Button>
-                  </>
-                )}
-              </div>
+              <Approvals address={address} nativeBalance={nativeBalance} isBatchApprovalMode={isBatchApprovalMode} />
 
               {/* Check Allowance */}
               <div className="space-y-5">

@@ -37,3 +37,69 @@ export const createTransferSchema = (availableBAlance: number) =>
   });
 
 export type TransferSchema = z.infer<typeof createTransferSchema>;
+
+/**
+ * Schema factory for token approvals.
+ * Each approval validates against its own available balance.
+ * Also checks aggregate total per token.
+ */
+export const createApprovalSchema = () =>
+  z.object({
+    approvals: z
+      .array(
+        z.object({
+          spender: z
+            .string()
+            .min(1, { message: "Spender address is required" })
+            .refine(addr => isAddress(addr), {
+              message: "Invalid Ethereum address",
+            }),
+          amount: z.number().gt(0, { message: "Amount is required" }).positive("Amount must be greater than zero"),
+          tokenAddress: z.string().min(1, { message: "Token address is required" }),
+          tokenSymbol: z.string().min(1, { message: "Token symbol is required" }),
+          availableBalance: z.number().nonnegative({ message: "Invalid available balance" }),
+          decimals: z.number().optional(),
+        }),
+      )
+      .superRefine((approvals, ctx) => {
+        // 🔹 1️⃣ Validate per-approval balance
+        approvals.forEach((approval, index) => {
+          if (approval.amount > approval.availableBalance) {
+            ctx.addIssue({
+              code: "custom",
+              message: `Insufficient ${approval.tokenSymbol} balance`,
+              path: [index, "amount"],
+            });
+          }
+        });
+
+        const totals = approvals.reduce<Record<string, { symbol: string; total: number; available: number }>>(
+          (acc, approval) => {
+            const token = acc[approval.tokenAddress] || {
+              symbol: approval.tokenSymbol,
+              total: 0,
+              available: approval.availableBalance,
+            };
+            token.total += approval.amount;
+            acc[approval.tokenAddress] = token;
+            return acc;
+          },
+          {},
+        );
+
+        Object.entries(totals).forEach(([tokenAddr, { symbol, total, available }]) => {
+          if (total > available) {
+            const index = approvals.findIndex(a => a.tokenAddress === tokenAddr);
+            ctx.addIssue({
+              code: "custom",
+              message: `Total approvals for ${symbol} (${total.toFixed(
+                4,
+              )}) exceed available balance of ${available.toFixed(4)}.`,
+              path: [index, "amount"],
+            });
+          }
+        });
+      }),
+  });
+
+export type ApprovalSchema = z.infer<ReturnType<typeof createApprovalSchema>>;
