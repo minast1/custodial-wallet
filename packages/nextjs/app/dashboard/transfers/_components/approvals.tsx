@@ -5,56 +5,21 @@ import SingleApprovalForm from "./single-approval-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ShieldCheck } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
-import { Address } from "viem";
-import { NativeBalanceType, useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { ApprovalSchema, createApprovalSchema } from "~~/lib/schema";
 
 type TProps = {
-  address: Address | undefined;
-  nativeBalance: NativeBalanceType | undefined;
   isBatchApprovalMode: boolean;
 };
-const Approvals = ({ isBatchApprovalMode, nativeBalance }: TProps) => {
-  const { tokenData, isLoading: isLoadingTokenData } = useGetTokenBalances(nativeBalance);
+const Approvals = ({ isBatchApprovalMode }: TProps) => {
   // const [token, setToken] = useState<TokenData | undefined>();
-  const tokens = tokenData.tokens.filter(t => t.symbol !== "ETH");
+
   const methods = useForm<ApprovalSchema>({
     resolver: zodResolver(createApprovalSchema()),
     defaultValues: {
-      approvals: [],
+      approvals: [{ spender: "", amount: 0 }],
     },
     mode: "onChange",
   });
-
-  // const findAndSetToken = (symbol: string) => {
-  //   const token = tokenData.tokens.find(t => t.symbol === symbol);
-  //   if (token) {
-  //     setToken(token);
-  //     // reset({
-  //     //   transfers: [{ address: "", amount: 0, tokenAddress: token.address, decimals: token.decimals }],
-  //     // });
-  //   }
-  // };
-  // Reset token balace after invalidation && setting default selected token
-  // useEffect(() => {
-  //   if (!tokenData?.tokens?.length) return;
-
-  //   const defaultToken = tokenData.tokens.find(t => t.symbol === "ETH");
-
-  //   if (defaultToken && !token) {
-  //     setToken(defaultToken);
-  //     // reset({
-  //     //   transfers: [{ address: "", amount: 0, tokenAddress: defaultToken.address, decimals: defaultToken.decimals }],
-  //     // });
-  //     return;
-  //   }
-  //   if (token) {
-  //     const updatedToken = tokenData.tokens.find(t => t.address === token.address);
-  //     if (updatedToken && updatedToken.balance !== token.balance) {
-  //       setToken(updatedToken);
-  //     }
-  //   }
-  // }, [tokenData.tokens, token, setToken]);
 
   return (
     <div className="space-y-5">
@@ -66,15 +31,14 @@ const Approvals = ({ isBatchApprovalMode, nativeBalance }: TProps) => {
       {!isBatchApprovalMode ? (
         <FormProvider {...methods}>
           <SingleApprovalForm
-            isLoadingTokenData={isLoadingTokenData}
-            //setCurrentToken={findAndSetToken}
-            // selectedToken={token}
-            tokens={tokens}
+          //setCurrentToken={findAndSetToken}
+          // selectedToken={token}
+          // tokens={tokens}
           />
         </FormProvider>
       ) : (
         <FormProvider {...methods}>
-          <BatchApprovalForm isLoadingTokenData={isLoadingTokenData} tokens={tokens} />
+          <BatchApprovalForm />
         </FormProvider>
       )}
     </div>

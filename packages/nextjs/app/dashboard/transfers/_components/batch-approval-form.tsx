@@ -4,30 +4,40 @@ import { Plus, ShieldCheck } from "lucide-react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { Button } from "~~/components/ui/button";
 import { Label } from "~~/components/ui/label";
-import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
+import { useBatchApproveAndTransfer } from "~~/hooks/transfers/useBatchApproveAndTransfer";
 import { ApprovalSchema } from "~~/lib/schema";
 
-type TProps = {
-  //selectedToken: TokenData | undefined;
-  isLoadingTokenData: boolean;
-  // setSelectedToken: (symbol: string) => void;
-  tokens: TokenData[];
-};
-const BatchApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
-  const { control } = useFormContext<ApprovalSchema>();
+const BatchApprovalForm = () => {
+  const { executeBatch } = useBatchApproveAndTransfer();
+  const { control, handleSubmit, reset } = useFormContext<ApprovalSchema>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "approvals",
   });
 
-  //   useEffect(() => {
-  //   reset({
-  //     transfers: [{ address: "", amount: 0, tokenAddress: selectedToken?.address, decimals: selectedToken?.decimals }],
-  //   })
-  // }, [selectedToken])
-
+  const handleBatchSubmit = (data: ApprovalSchema) => {
+    console.log(data);
+    executeBatch(
+      {
+        approvals: data.approvals.map(t => ({
+          spender: t.spender,
+          amount: t.amount.toString(),
+          tokenAddress: t?.tokenAddress,
+          decimals: t?.decimals,
+        })),
+      },
+      {
+        onSuccess: () => {
+          reset();
+        },
+        onError: err => {
+          console.log(err);
+        },
+      },
+    );
+  };
   return (
-    <>
+    <form onSubmit={handleSubmit(handleBatchSubmit)}>
       <div className="flex items-center justify-between mb-3">
         <Label className="text-base">Spenders ({fields.length})</Label>
         <Button
@@ -51,12 +61,11 @@ const BatchApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
         </Button>
       </div>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 mb-3">
         {fields.map((spender, index) => (
           <SpenderCard
             key={spender.id}
-            tokenData={tokens}
-            isLoadingTokenData={isLoadingTokenData}
+            //tokenData={tokens}
             spenderIndex={index}
             spenders={fields.length}
             spender={spender}
@@ -72,7 +81,7 @@ const BatchApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
         <ShieldCheck className="w-5 h-5 mr-2" />
         Approve Batch ({fields.length} Spender{fields.length !== 1 ? "s" : ""})
       </Button>
-    </>
+    </form>
   );
 };
 

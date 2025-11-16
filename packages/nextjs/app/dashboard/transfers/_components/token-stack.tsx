@@ -1,19 +1,45 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import clsx from "clsx";
+import { useAccount } from "wagmi";
 import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
 import { Skeleton } from "~~/components/ui/skeleton";
-import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
+import { useTargetNetwork, useWatchBalance } from "~~/hooks/scaffold-eth";
+import { TokenData, useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { getTokenIcon } from "~~/utils/get-tokenicon";
 
 type TProps = {
-  isLoadingData: boolean;
-  setToken: (symbol: string, index?: number) => void;
+  isNativeTransfer: boolean;
+  setToken: (selected: TokenData, index?: number) => void;
   selectedToken: TokenData | undefined;
   className?: string;
-  tokens: TokenData[];
   index?: number;
 };
-const TokenStack = ({ isLoadingData, tokens, setToken, selectedToken, className, index }: TProps) => {
+const TokenStack = ({ setToken, selectedToken, isNativeTransfer, className, index }: TProps) => {
+  const { address, isConnected } = useAccount();
+  const { targetNetwork } = useTargetNetwork();
+  // const [tokens, setTokens] = React.useState<TokenData[]>([]);
+  const { data: nativeBalance } = useWatchBalance({
+    address,
+    chainId: targetNetwork.id,
+    query: { enabled: !!isConnected },
+  });
+  const { tokenData, isLoading: isLoadingData } = useGetTokenBalances(nativeBalance);
+
+  const filteredTokens = useMemo(() => {
+    if (!tokenData) return [];
+
+    return !isNativeTransfer ? tokenData.tokens.filter(t => t.symbol !== "ETH") : tokenData.tokens;
+  }, [isNativeTransfer, tokenData]);
+
+  useEffect(() => {
+    if (!filteredTokens.length) return;
+
+    if (!selectedToken) {
+      setToken(filteredTokens[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredTokens]);
+
   return (
     <div className={clsx("grid grid-cols-4 gap-3", className)}>
       {isLoadingData
@@ -27,13 +53,13 @@ const TokenStack = ({ isLoadingData, tokens, setToken, selectedToken, className,
               <Skeleton className="w-12 h-3 rounded" />
             </div>
           ))
-        : tokens?.map(t => {
+        : filteredTokens?.map(t => {
             const iconUri = getTokenIcon(t.symbol);
             return (
               <button
                 type="button"
                 key={t.symbol}
-                onClick={() => setToken(t.symbol, index)}
+                onClick={() => setToken(t, index)}
                 className={`
                                 relative p-4 rounded-xl border-2 transition-all duration-200
                                 flex flex-col items-center justify-center gap-2 group
@@ -52,7 +78,7 @@ const TokenStack = ({ isLoadingData, tokens, setToken, selectedToken, className,
                     {t.symbol}
                   </AvatarFallback>
                 </Avatar>
-                {/* <Avatar className={`w-6 h-6 ${token === t.symbol ? "text-primary" : t.color} transition-colors`} /> */}
+
                 <span
                   className={`text-xs font-bold ${selectedToken?.symbol === t.symbol ? "text-primary" : "text-muted-foreground"}`}
                 >

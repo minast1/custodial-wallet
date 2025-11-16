@@ -103,3 +103,20 @@ export const createApprovalSchema = () =>
   });
 
 export type ApprovalSchema = z.infer<ReturnType<typeof createApprovalSchema>>;
+
+export const allowanceSchema = z.object({
+  spender: z
+    .string()
+    .min(1, { message: "Spender address is required" })
+    .refine(addr => isAddress(addr), {
+      message: "Invalid Ethereum address",
+    }),
+  // tokenAddress: z
+  //   .string()
+  //   .min(1, { message: "Token address is required" })
+  //   .refine(addr => isAddress(addr), {
+  //     message: "Invalid Token address",
+  //   }),
+});
+
+export type AllowanceSchema = z.infer<typeof allowanceSchema>;

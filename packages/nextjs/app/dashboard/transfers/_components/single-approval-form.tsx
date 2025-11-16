@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import TokenStack from "./token-stack";
 import clsx from "clsx";
 import { Loader2, ShieldCheck } from "lucide-react";
@@ -12,13 +12,10 @@ import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
 import { useSingleApproveAndTransfer } from "~~/hooks/transfers/useSingleApproveAndTransfer";
 import { ApprovalSchema } from "~~/lib/schema";
 
-type TProps = {
-  isLoadingTokenData: boolean;
-  // setCurrentToken: (symbol: string) => void;
-
-  tokens: TokenData[];
-};
-const SingleApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
+// type TProps = {
+//   tokens: TokenData[];
+// };
+const SingleApprovalForm = () => {
   const [selectedToken, setSelectedToken] = useState<TokenData | undefined>();
   const { executeSingle, isPending } = useSingleApproveAndTransfer();
   const {
@@ -30,22 +27,14 @@ const SingleApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
     formState: { errors },
   } = useFormContext<ApprovalSchema>();
 
-  useEffect(() => {
-    setSelectedToken(tokens[0]);
-    reset({
-      approvals: [{ spender: "", amount: 0 }],
-    });
-  }, []);
-
-  const handleTokenSelect = (symbol: string) => {
-    const selected = tokens.find(t => t.symbol === symbol);
+  const handleTokenSelect = (selected: TokenData) => {
+    // const selected = tokens.find(t => t.symbol === symbol);
     if (!selected) return;
     setSelectedToken(selected);
     setValue(`approvals.0.tokenAddress`, selected.address);
     setValue(`approvals.0.tokenSymbol`, selected.symbol);
     setValue(`approvals.${0}.availableBalance`, selected.balance);
     setValue(`approvals.${0}.decimals`, selected.decimals);
-    setValue(`approvals.${0}.availableBalance`, selected.balance);
   };
 
   const handleTokenApproval = async (data: ApprovalSchema) => {
@@ -76,10 +65,9 @@ const SingleApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
         <div className="space-y-3">
           <Label className="text-base">Select Token</Label>
           <TokenStack
-            isLoadingData={isLoadingTokenData}
             setToken={handleTokenSelect}
             selectedToken={selectedToken}
-            tokens={tokens}
+            isNativeTransfer={false}
             className="mb-4"
           />
         </div>
@@ -106,18 +94,6 @@ const SingleApprovalForm = ({ isLoadingTokenData, tokens }: TProps) => {
             </FieldDescription>
           )}
         </Field>
-        {/* <div className="space-y-3">
-          <Label htmlFor="approvalAddress" className="text-base">
-            Contract/DEX Address
-          </Label>
-          <Input
-            id="approvalAddress"
-            placeholder="0x1234...abcd"
-            className="glass-card font-mono h-12 text-base border-2 focus-visible:border-primary"
-            //value={approvalAddress}
-            // onChange={e => setApprovalAddress(e.target.value)}
-          />
-        </div> */}
         <Field
           className={clsx(
             errors.approvals?.[0]?.amount && " text-red-400 [&_input[type=text]]:border-red-400",
