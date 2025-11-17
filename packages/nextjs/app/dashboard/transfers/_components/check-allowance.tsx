@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
 import { AddressInput } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
+import { FieldGroup } from "~~/components/ui/field";
 import { Input } from "~~/components/ui/input";
 import { Label } from "~~/components/ui/label";
 import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
@@ -51,62 +52,63 @@ const CheckAllowance = () => {
         <Search className="w-5 h-5 text-primary" />
         Check Allowance
       </h3>
-
-      <div className="space-y-2">
-        <Label className="text-base">Select Token</Label>
-        <TokenStack isNativeTransfer={false} selectedToken={selectedToken} setToken={handleTokenChange} />
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="checkContract" className="text-base">
-          Contract/Spender Address
-        </Label>
-        <AddressInput
-          placeholder="0x1234...abcd"
-          control={control}
-          name="spender"
-          className="glass-card font-mono h-12 text-base border focus-visible:border-primary"
-        />
-
-        {errors.spender && <p className="text-red-500 text-sm">{errors.spender.message}</p>}
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="yourAddress" className="text-base">
-          Your Address
-        </Label>
-        <Input
-          id="yourAddress"
-          value={address}
-          className="glass-card font-mono h-12 text-base border-2 bg-muted/50"
-          readOnly
-        />
-      </div>
-
-      {allowance ? (
-        <div className="p-4 rounded-xl border-2 border-primary/30 bg-primary/5">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Current Allowance</span>
-            <span className="text-lg font-bold text-primary">
-              {allowance === "0" ? "None" : `${allowance} ${selectedToken?.symbol}`}
-            </span>
-          </div>
+      <FieldGroup className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 space-y-3 bg-gray-100">
+        <div className="space-y-2">
+          <Label className="text-base">Select Token</Label>
+          <TokenStack isNativeTransfer={false} selectedToken={selectedToken} setToken={handleTokenChange} />
         </div>
-      ) : null}
 
-      <Button className="w-full h-12 crypto-gradient text-primary-foreground text-base font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all">
-        {isRefetching ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Checking...
-          </>
-        ) : (
-          <>
-            <Search className="w-5 h-5 mr-2" />
-            Check Allowance
-          </>
-        )}
-      </Button>
+        <div className="space-y-1">
+          <Label htmlFor="checkContract" className="text-base">
+            Contract/Spender Address
+          </Label>
+          <AddressInput
+            placeholder="0x1234...abcd"
+            control={control}
+            name="spender"
+            className="glass-card font-mono h-12 text-base border focus-visible:border-primary"
+          />
+
+          {errors.spender && <p className="text-red-500 text-sm">{errors.spender.message}</p>}
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="yourAddress" className="text-base">
+            Your Address
+          </Label>
+          <Input
+            id="yourAddress"
+            value={address}
+            className="glass-card font-mono h-12 text-base border-2 bg-muted/50"
+            readOnly
+          />
+        </div>
+
+        {allowance ? (
+          <div className="p-4 rounded-xl border-2 border-primary/30 bg-primary/5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Current Allowance</span>
+              <span className="text-lg font-bold text-primary">
+                {allowance === "0" ? "None" : `${allowance} ${selectedToken?.symbol}`}
+              </span>
+            </div>
+          </div>
+        ) : null}
+
+        <Button className="w-full h-12 crypto-gradient text-primary-foreground text-base font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all">
+          {isRefetching ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              Checking...
+            </>
+          ) : (
+            <>
+              <Search className="w-5 h-5 mr-2" />
+              Check Allowance
+            </>
+          )}
+        </Button>
+      </FieldGroup>
     </form>
   );
 };

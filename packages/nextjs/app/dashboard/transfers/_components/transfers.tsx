@@ -6,11 +6,12 @@ import { Loader2, Plus, Send, X } from "lucide-react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Address } from "viem";
 import { z } from "zod";
+import { AddressInput } from "~~/components/scaffold-eth";
 import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
 import { Button } from "~~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~~/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~~/components/ui/field";
-import { Input } from "~~/components/ui/input";
+//import { Input } from "~~/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
 import { Label } from "~~/components/ui/label";
 import { Skeleton } from "~~/components/ui/skeleton";
@@ -277,13 +278,19 @@ const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) =>
                   <FieldLabel htmlFor="single-address" className="text-sm">
                     Recipient Address
                   </FieldLabel>
-                  <Input
+                  <AddressInput
+                    control={control}
+                    placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+                    className="glass-card font-mono h-10 text-sm border-2 focus-visible:border-border"
+                    name={`transfers.${index}.address` as const}
+                  />
+                  {/* <Input
                     type="text"
                     id={`single-address-${index}`}
                     {...register(`transfers.${index}.address` as const)}
                     placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
                     className="glass-card font-mono h-10 text-sm border-2 focus-visible:border-border"
-                  />
+                  /> */}
                   {errors.transfers?.[index]?.address && (
                     <FieldDescription className="text-xs text-red-500">
                       {errors.transfers?.[index]?.address?.message}
