@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useAccount } from "wagmi";
+import { AddressInput } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
 import { Input } from "~~/components/ui/input";
 import { Label } from "~~/components/ui/label";
@@ -24,9 +25,10 @@ const CheckAllowance = () => {
   };
 
   const {
-    register,
+    control,
     formState: { errors },
     watch,
+
     handleSubmit,
   } = useForm<AllowanceSchema>({
     resolver: zodResolver(allowanceSchema),
@@ -59,13 +61,13 @@ const CheckAllowance = () => {
         <Label htmlFor="checkContract" className="text-base">
           Contract/Spender Address
         </Label>
-        <Input
-          id="checkContract"
+        <AddressInput
           placeholder="0x1234...abcd"
-          className="glass-card font-mono h-12 text-base border-2 focus-visible:border-primary"
-          {...register("spender")}
-          // onChange={e => setCheckContract(e.target.value)}
+          control={control}
+          name="spender"
+          className="glass-card font-mono h-12 text-base border focus-visible:border-primary"
         />
+
         {errors.spender && <p className="text-red-500 text-sm">{errors.spender.message}</p>}
       </div>
 

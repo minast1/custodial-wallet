@@ -1,57 +1,56 @@
-import { useEffect, useState } from "react";
-import { blo } from "blo";
-import { useDebounceValue } from "usehooks-ts";
-import { Address, isAddress } from "viem";
+import { useCallback, useEffect, useState } from "react";
+import clsx from "clsx";
+//import { blo } from "blo";
+import { Loader2, User } from "lucide-react";
+import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
+//import { useDebounceValue } from "usehooks-ts";
+import { isAddress } from "viem";
 import { normalize } from "viem/ens";
 import { useEnsAddress, useEnsAvatar, useEnsName } from "wagmi";
-import { isENS } from "~~/components/scaffold-eth";
+//import { isENS } from "~~/components/scaffold-eth";
+import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
 //import { Input } from "~~/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
 
 /**
  * Address input with ENS name resolution
  */
-type TProps = {
+type AddressInputProps<T extends FieldValues> = {
   className?: string;
-  value: Address | string;
-  onChange?: (newValue: Address | string) => void;
-  name?: string;
+  //value: Address | string;
+  //onChange?: (newValue: Address | string) => void;
+  control: Control<T>;
+  name: FieldPath<T>;
   placeholder?: string;
   disabled?: boolean;
 };
-export const AddressInput = ({ value, name, placeholder, disabled, className }: TProps) => {
+export function AddressInput<T extends FieldValues>({
+  name,
+  placeholder,
+  disabled,
+  className,
+  control,
+}: AddressInputProps<T>) {
   // Debounce the input to keep clean RPC calls when resolving ENS names
   // If the input is an address, we don't need to debounce it
-  const [_debouncedValue] = useDebounceValue(value, 500);
-  const debouncedValue = isAddress(value) ? value : _debouncedValue;
-  const isDebouncedValueLive = debouncedValue === value;
+  const [input, setInput] = useState<string>("");
+  const [enteredEnsName, setEnteredEnsName] = useState<string | undefined>();
+  const [ensToAddrEnabled, setEnsToAddrEnabled] = useState<boolean>(false);
 
-  // If the user changes the input after an ENS name is already resolved, we want to remove the stale result
-  const settledValue = isDebouncedValueLive ? debouncedValue : undefined;
-
-  const {
-    data: ensAddress,
-    isLoading: isEnsAddressLoading,
-    //isError: isEnsAddressError,
-  } = useEnsAddress({
-    name: settledValue,
+  const { data: ensAddress, isLoading: isEnsAddressLoading } = useEnsAddress({
+    name: ensToAddrEnabled ? input : undefined,
     chainId: 1,
     query: {
       gcTime: 30_000,
-      enabled: isDebouncedValueLive && isENS(debouncedValue),
+      enabled: ensToAddrEnabled,
     },
   });
 
-  const [enteredEnsName, setEnteredEnsName] = useState<string>();
-  const {
-    data: ensName,
-    isLoading: isEnsNameLoading,
-    // isError: isEnsNameError,
-  } = useEnsName({
-    address: settledValue as Address,
+  const { data: ensName, isLoading: isEnsNameLoading } = useEnsName({
+    address: ensToAddrEnabled ? input : undefined,
     chainId: 1,
     query: {
-      enabled: isAddress(debouncedValue),
+      enabled: ensToAddrEnabled,
       gcTime: 30_000,
     },
   });
@@ -65,60 +64,88 @@ export const AddressInput = ({ value, name, placeholder, disabled, className }: 
     },
   });
 
-  // ens => address
+  const {
+    field: { onChange, onBlur, value },
+  } = useController({
+    name,
+    control,
+  });
+
+  const handleENSChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newInput = event.target.value;
+      setInput(newInput);
+      setEnsToAddrEnabled(newInput.endsWith(".eth") && !isAddress(newInput));
+      onChange(newInput);
+
+      if (isAddress(newInput)) {
+        setEnteredEnsName(undefined);
+        setEnsToAddrEnabled(true);
+      } else {
+        setEnteredEnsName((newInput as string).endsWith(".eth") ? undefined : newInput);
+      }
+    },
+    [onChange],
+  );
+
   useEffect(() => {
-    if (!ensAddress) return;
-
-    // ENS resolved successfully
-    setEnteredEnsName(debouncedValue);
-    //onChange(ensAddress);
-  }, [ensAddress, debouncedValue]);
+    if (ensAddress) {
+      onChange(ensAddress);
+      setInput(ensAddress);
+      setEnteredEnsName(undefined);
+    }
+  }, [ensAddress, onChange]);
 
   useEffect(() => {
-    setEnteredEnsName(undefined);
-  }, [value]);
-
-  // const reFocus = isEnsAddressError || isEnsNameError || ensName === null || ensAddress === null;
+    if (ensName) {
+      setEnteredEnsName(ensName);
+    } else {
+      setEnteredEnsName(undefined);
+    }
+  }, [ensName]);
 
   return (
     <InputGroup className={className}>
-      <InputGroupInput
-        placeholder={placeholder}
-        name={name}
-        value={value as Address}
-        // onChange={() => onChange}
-        disabled={isEnsAddressLoading || isEnsNameLoading || disabled}
-      />
-      <InputGroupAddon>
+      <InputGroupAddon className={clsx(ensName && "bg-primary/5 rounded-l-md")}>
         {ensName ? (
-          <div className="flex bg-base-300 rounded-l-full items-center">
-            {isEnsAvatarLoading && <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>}
+          <>
+            {isEnsAvatarLoading && <Loader2 className="w-8 h-8 animate-spin text-primary/80" />}
             {ensAvatar ? (
-              <span className="w-[35px]">
-                {
-                  // eslint-disable-next-line
-                  <img className="w-full rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />
-                }
-              </span>
+              <Avatar className="rounded-full">
+                <AvatarImage src={ensAvatar} alt={`${ensAddress} avatar`} />
+                <AvatarFallback>
+                  <User className="w-4 h-4" />
+                </AvatarFallback>
+              </Avatar>
             ) : null}
-            <span className="text-accent px-2">{enteredEnsName ?? ensName}</span>
-          </div>
+            <span className="text-accent px-2 ">{enteredEnsName ?? ensName}</span>
+          </>
         ) : (
           (isEnsNameLoading || isEnsAddressLoading) && (
-            <div className="flex bg-base-300 rounded-l-full items-center gap-2 pr-2">
-              <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>
-              <div className="skeleton bg-base-200 h-3 w-20"></div>
-            </div>
+            // <div className="flex bg-primary-300 rounded-l-full items-center gap-2 pr-2">
+            //   <div className="skeleton bg-base-200 w-[35px] h-[35px] rounded-full shrink-0"></div>
+            //   <div className="skeleton bg-base-200 h-3 w-20"></div>
+            // </div>
+            <Loader2 className="w-6 animate-spin text-primary/80" />
           )
         )}
       </InputGroupAddon>
-      <InputGroupAddon align="inline-end">
+      <InputGroupInput
+        placeholder={placeholder}
+        value={value}
+        onChange={handleENSChange}
+        disabled={disabled}
+        className={clsx("text-xs text-gray-500 font-normal", ensName && "w-7/8 truncate")}
+        onBlur={onBlur}
+      />
+
+      {/* <InputGroupAddon align="inline-end">
         {
           // Don't want to use nextJS Image here (and adding remote patterns for the URL)
           // eslint-disable-next-line @next/next/no-img-element
           value && <img alt="" className="rounded-full!" src={blo(value as `0x${string}`)} width="35" height="35" />
         }
-      </InputGroupAddon>
+      </InputGroupAddon> */}
     </InputGroup>
   );
   //     error={ensAddress === null}
@@ -154,4 +181,4 @@ export const AddressInput = ({ value, name, placeholder, disabled, className }: 
   //     }
   //   />
   // );
-};
+}
