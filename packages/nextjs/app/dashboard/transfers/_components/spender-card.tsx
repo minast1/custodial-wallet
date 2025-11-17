@@ -3,9 +3,10 @@ import TokenStack from "./token-stack";
 import clsx from "clsx";
 import { X } from "lucide-react";
 import { FieldArrayWithId, UseFieldArrayRemove, useFormContext } from "react-hook-form";
+import { AddressInput } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~~/components/ui/field";
-import { Input } from "~~/components/ui/input";
+//import { Input } from "~~/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
 import { Label } from "~~/components/ui/label";
 import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
@@ -21,9 +22,9 @@ type TProps = {
       approvals: {
         spender: string;
         amount: number;
-        tokenAddress: string;
-        tokenSymbol: string;
-        availableBalance: number;
+        tokenAddress: string | undefined;
+        tokenSymbol: string | undefined;
+        availableBalance: number | undefined;
         decimals?: number | undefined;
       }[];
     },
@@ -36,6 +37,7 @@ const SpenderCard = ({ remove, spenders, spenderIndex }: TProps) => {
   const {
     register,
     setValue,
+    control,
     formState: { errors },
   } = useFormContext<ApprovalSchema>();
 
@@ -88,13 +90,20 @@ const SpenderCard = ({ remove, spenders, spenderIndex }: TProps) => {
         <FieldLabel htmlFor="single-address" className="text-base">
           Contract/DEX Address
         </FieldLabel>
-        <Input
+        <AddressInput
+          control={control}
+          name={`approvals.${spenderIndex}.spender` as const}
+          placeholder="0x1234...abcd"
+          className="glass-card font-mono h-12 text-base border-2 focus-visible:border-primary"
+          // {...register(`approvals.${0}.spender` as const)}
+        />
+        {/* <Input
           id="approvalAddress"
           type="text"
           placeholder="0x1234...abcd"
           className="glass-card font-mono h-10 text-base border-2 focus-visible:border-primary"
           {...register(`approvals.${spenderIndex}.spender` as const)}
-        />
+        /> */}
         {errors.approvals?.[spenderIndex]?.spender && (
           <FieldDescription className="text-xs text-red-500">
             {errors.approvals?.[spenderIndex]?.spender?.message}

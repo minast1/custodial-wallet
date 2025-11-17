@@ -3,9 +3,10 @@ import TokenStack from "./token-stack";
 import clsx from "clsx";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useFormContext } from "react-hook-form";
+import { AddressInput } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~~/components/ui/field";
-import { Input } from "~~/components/ui/input";
+//import { Input } from "~~/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
 import { Label } from "~~/components/ui/label";
 import { TokenData } from "~~/hooks/tokens/useGetTokenBalances";
@@ -22,7 +23,7 @@ const SingleApprovalForm = () => {
     register,
     reset,
     setValue,
-
+    control,
     handleSubmit,
     formState: { errors },
   } = useFormContext<ApprovalSchema>();
@@ -81,13 +82,14 @@ const SingleApprovalForm = () => {
           <FieldLabel htmlFor="single-address" className="text-base">
             Contract/DEX Address
           </FieldLabel>
-          <Input
-            id="approvalAddress"
-            type="text"
+          <AddressInput
+            control={control}
+            name={`approvals.${0}.spender` as const}
             placeholder="0x1234...abcd"
             className="glass-card font-mono h-12 text-base border-2 focus-visible:border-primary"
-            {...register(`approvals.${0}.spender` as const)}
+            // {...register(`approvals.${0}.spender` as const)}
           />
+
           {errors.approvals?.[0]?.spender && (
             <FieldDescription className="text-xs text-red-500">
               {errors.approvals?.[0]?.spender?.message}

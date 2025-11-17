@@ -16,7 +16,7 @@ const BatchApprovalForm = () => {
   });
 
   const handleBatchSubmit = (data: ApprovalSchema) => {
-    console.log(data);
+    // console.log(data);
     executeBatch(
       {
         approvals: data.approvals.map(t => ({

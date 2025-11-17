@@ -35,7 +35,7 @@ const TokenStack = ({ setToken, selectedToken, isNativeTransfer, className, inde
     if (!filteredTokens.length) return;
 
     if (!selectedToken) {
-      setToken(filteredTokens[0]);
+      setToken(filteredTokens[0], index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredTokens]);
