@@ -1,7 +1,7 @@
-import { useEffect, useMemo } from "react";
 import { useTargetNetwork } from "./scaffold-eth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAccount, useBlockNumber } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { decodeFunctionData, erc20Abi } from "viem";
+import { UsePublicClientReturnType, useAccount, usePublicClient } from "wagmi";
 import { EXPLORER_APIS } from "~~/utils/explorer-apis";
 
 export type TxType = "native" | "erc20" | "erc721" | "erc1155" | "internal";
@@ -27,26 +27,106 @@ export interface Tx {
 //   if (!hex) return 0;
 //   return parseInt(hex, 16);
 // }
+const ZERO = "0x0000000000000000000000000000000000000000";
+export type TxCategory =
+  | {
+      category: "approval";
+      symbol: string;
+      amount: number;
+    }
+  | {
+      category: "mint" | "burn" | "swap" | "received" | "sent" | "transfer";
+    };
+const categoryParser = async function (
+  tx: any,
+  address: string,
+  client: UsePublicClientReturnType,
+): Promise<TxCategory> {
+  const from = tx.from?.toLowerCase();
+  const to = tx.to?.toLowerCase();
+  const user = address.toLowerCase();
 
-function inferCategory(tx: any, address: string): string {
-  const zeroAddress = "0x0000000000000000000000000000000000000000";
+  // --- Mint / Burn ---
+  if (from === ZERO) return { category: "mint" };
+  if (to === ZERO) return { category: "burn" };
 
-  if (tx.from?.toLowerCase() === zeroAddress) return "mint";
-  if (tx.to?.toLowerCase() === zeroAddress) return "burn";
-
-  const dexRouters = [
+  // --- Known DEX Routers ---
+  const dexRouters = new Set([
     "0xe592427a0aece92de3edee1f18e0157c05861564", // Uniswap V3
     "0x1b02da8cb0d097eb8d57a175b88c7d8b47997506", // SushiSwap
     "0xdef1c0ded9bec7f1a1670819833240f027b25eff", // 0x Exchange
     "0x1111111254eeb25477b68fb85ed929f73a960582", // 1inch
-  ];
+  ]);
 
-  if (dexRouters.includes(tx.to?.toLowerCase())) return "swap";
+  if (dexRouters.has(to)) return { category: "swap" };
 
-  if (tx.to?.toLowerCase() === address.toLowerCase()) return "received";
-  if (tx.from?.toLowerCase() === address.toLowerCase()) return "sent";
-  return "transfer";
-}
+  // --- Pull the *full transaction* to detect Approvals ---
+  let fullTx;
+  try {
+    fullTx = await client?.getTransaction({ hash: tx.hash }).catch(() => null);
+  } catch {
+    fullTx = null;
+  }
+
+  // No input data = not an approval
+  if (!fullTx || !fullTx.input || fullTx.input === "0x") {
+    // fallback to sent/received
+    if (to === user) return { category: "received" };
+    if (from === user) return { category: "sent" };
+    return { category: "transfer" };
+  }
+
+  try {
+    const decoded = decodeFunctionData({
+      abi: erc20Abi,
+      data: fullTx.input,
+    });
+
+    if (decoded.functionName === "approve") {
+      const [, amount] = decoded.args as [string, bigint];
+
+      const tokenAddress = fullTx.to?.toLowerCase();
+
+      if (!tokenAddress || !client) return { category: "approval", symbol: "", amount: 0 };
+
+      const [decimals, symbol] = await Promise.all([
+        client
+          .readContract({
+            address: tokenAddress,
+            abi: erc20Abi,
+            functionName: "decimals",
+          })
+          .catch(() => 18),
+
+        client
+          .readContract({
+            address: tokenAddress,
+            abi: erc20Abi,
+            functionName: "symbol",
+          })
+          .catch(() => "UNKNOWN"),
+      ]);
+
+      const formattedAmount = Number(amount) / 10 ** decimals;
+      return {
+        category: "approval",
+        symbol,
+        amount: formattedAmount,
+      };
+    }
+  } catch (err: any) {
+    // Ignore ABI signature mismatch errors — normal for non-ERC20 calls
+    if (!(err?.name === "AbiFunctionSignatureNotFoundError" || err?.message?.includes("not found"))) {
+      console.warn("Unexpected decode error:", err);
+    }
+  }
+
+  // --- Regular incoming/outgoing transfers ---
+  if (to === user) return { category: "received" };
+  if (from === user) return { category: "sent" };
+
+  return { category: "transfer" };
+};
 
 function formatTxCategory(transfer: any): TxType {
   if (transfer.category?.includes("erc721")) return "erc721";
@@ -58,7 +138,7 @@ function formatTxCategory(transfer: any): TxType {
 /**
  * Fetch confirmed transactions (sent + received)
  */
-async function fetchConfirmedTxs(limit: number, rpcUrl: string, address: string) {
+async function fetchConfirmedTxs(client: UsePublicClientReturnType, rpcUrl: string, address: string) {
   const payload = (filter: Record<string, any>) => ({
     jsonrpc: "2.0",
     id: 0,
@@ -90,25 +170,31 @@ async function fetchConfirmedTxs(limit: number, rpcUrl: string, address: string)
   ]);
 
   const [outJson, inJson] = await Promise.all([outRes.json(), inRes.json()]);
+
   const outTxs = outJson?.result?.transfers || [];
   const inTxs = inJson?.result?.transfers || [];
 
-  return [...outTxs, ...inTxs].map(
-    (tx: any): Tx => ({
+  const txPromises = [...outTxs, ...inTxs].map(async (tx: any): Promise<Tx> => {
+    const category = await categoryParser(tx, address, client);
+
+    return {
       hash: tx.hash,
       direction: tx.to?.toLowerCase() === address.toLowerCase() ? "in" : "out",
       from: tx.from,
       to: tx.to,
-      value: tx.value,
+      value: category.category === "approval" ? category.amount : tx.value,
       tokenName: tx.asset ?? tx.tokenName,
-      tokenSymbol: tx.asset ?? tx.tokenSymbol,
+      tokenSymbol: category.category === "approval" ? category.symbol : (tx.asset ?? tx.tokenSymbol),
       tokenId: tx.tokenId,
       type: formatTxCategory(tx),
       timeStamp: tx.metadata?.blockTimestamp ?? "",
       status: "confirmed",
-      category: inferCategory(tx, address),
-    }),
-  );
+      category: category?.category,
+    };
+  });
+
+  const confirmedTxs = await Promise.all(txPromises);
+  return confirmedTxs;
 }
 
 /**
@@ -173,7 +259,7 @@ async function fetchPendingTxs(limit: number, rpcUrl: string, address: string) {
         type: "native",
         timeStamp: timestamp,
         status: isPending ? "pending" : isFailed ? "failed" : "confirmed",
-        category: inferCategory(tx, address),
+        category: "internal",
       };
     });
   } catch {
@@ -183,16 +269,13 @@ async function fetchPendingTxs(limit: number, rpcUrl: string, address: string) {
 export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
   const { targetNetwork } = useTargetNetwork();
   const { address, isConnected } = useAccount();
-
-  const { data: blockNumber } = useBlockNumber({ watch: true, chainId: targetNetwork.id });
+  const client = usePublicClient({ chainId: targetNetwork.id });
+  // const { data: blockNumber } = useBlockNumber({ watch: true, chainId: targetNetwork.id });
 
   const rpcUrl = targetNetwork ? EXPLORER_APIS[targetNetwork.id] : EXPLORER_APIS[1];
-  const queryClient = useQueryClient();
+  //const queryClient = useQueryClient();
 
-  const queryKey = useMemo(
-    () => ["txHistory", address, targetNetwork, rpcUrl, limit],
-    [address, targetNetwork, rpcUrl, limit],
-  );
+  const queryKey = ["txHistory", address, targetNetwork, limit];
 
   const {
     data: txs = [],
@@ -207,41 +290,18 @@ export const useTransactionHistory = ({ limit = 3 }: { limit?: number }) => {
       if (!address) return [];
 
       const [confirmed, pending] = await Promise.all([
-        fetchConfirmedTxs(3, rpcUrl, address),
+        fetchConfirmedTxs(client, rpcUrl, address),
         fetchPendingTxs(3, rpcUrl, address),
       ]);
 
       const all = [...pending, ...confirmed];
-
+      //console.log(all);
       const unique = Array.from(new Map(all.map(tx => [tx.hash, tx])).values());
       return unique.sort((a, b) => (b.timeStamp > a.timeStamp ? 1 : -1)).slice(0, limit);
-      // return unique
-      //   .sort((a, b) => {
-      //     const ta = a.timeStamp ? new Date(a.timeStamp).getTime() : 0;
-      //     const tb = b.timeStamp ? new Date(b.timeStamp).getTime() : 0;
-      //     return tb - ta;
-      //   })
-      //   .slice(0, limit);
     },
     retry: false,
     //staleTime: 1000 * 60, // 1 minute,
   });
-
-  useEffect(() => {
-    const loader = async () => {
-      if (isConnected && address) {
-        await queryClient.ensureQueryData({ queryKey });
-      }
-    };
-
-    loader();
-  }, [rpcUrl, targetNetwork, isConnected, address, queryClient, queryKey]);
-
-  //another useEffect to invalidate the query
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockNumber, queryClient]);
 
   return {
     txs,

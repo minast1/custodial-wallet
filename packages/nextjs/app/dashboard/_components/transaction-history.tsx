@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { ArrowDownRight, ArrowUpRight, ClipboardClock, RefreshCcw, Trash2 } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CirclePoundSterling, ClipboardClock, RefreshCcw, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "~~/components/ui/avatar";
 import { Badge } from "~~/components/ui/badge";
 import { Button } from "~~/components/ui/button";
@@ -10,25 +10,8 @@ import { useTransactionHistory } from "~~/hooks/useTransactionHistory";
 import timeAgo from "~~/utils/format-time";
 
 const TransactionHistory = () => {
-  const { txs, isFetching } = useTransactionHistory({ limit: 3 });
-
-  // console.log(txs);
-  //   const clearHistory = () => {
-  //     setActivities([]);
-  //   };
-
-  // const getStatusVariant = (status: string) => {
-  //   switch (status) {
-  //     case "completed":
-  //       return "default";
-  //     case "pending":
-  //       return "secondary";
-  //     case "failed":
-  //       return "destructive";
-  //     default:
-  //       return "default";
-  //   }
-  // };
+  const { txs, isLoading } = useTransactionHistory({ limit: 3 });
+  console.log(txs);
   return (
     <Card className="glass-card">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -46,7 +29,7 @@ const TransactionHistory = () => {
         )}
       </CardHeader>
       <CardContent>
-        {isFetching ? (
+        {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="flex items-center gap-3 p-3">
@@ -80,7 +63,9 @@ const TransactionHistory = () => {
                           ? "bg-secondary/20"
                           : tx.category === "sent"
                             ? "bg-destructive/20"
-                            : "bg-primary/10"
+                            : tx.category === "approval"
+                              ? "bg-warning/20"
+                              : "bg-primary/10"
                     }`}
                   >
                     {tx.category === "received" ? (
@@ -89,6 +74,8 @@ const TransactionHistory = () => {
                       <ClipboardClock className="w-5 h-5" />
                     ) : tx.category === "sent" ? (
                       <ArrowUpRight className="w-5 h-5 text-destructive" />
+                    ) : tx.category === "approval" ? (
+                      <CirclePoundSterling className="w-5 h-5 text-warning" />
                     ) : (
                       <RefreshCcw className="w-5 h-5 text-primary" />
                     )}
@@ -121,7 +108,7 @@ const TransactionHistory = () => {
                   <p
                     className={`font-semibold uppercase ${tx.status === "confirmed" ? "text-success" : tx.status === "failed" ? "text-destructive" : "text-foreground"}`}
                   >
-                    {tx.value} {tx.tokenName}
+                    {tx.value} {tx.category === "approval" ? tx.tokenSymbol : tx.tokenName}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">{timeAgo(tx.timeStamp)}</p>
                 </div>
