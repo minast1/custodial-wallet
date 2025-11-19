@@ -11,7 +11,7 @@ import timeAgo from "~~/utils/format-time";
 
 const TransactionHistory = () => {
   const { txs, isLoading } = useTransactionHistory({ limit: 3 });
-  console.log(txs);
+
   return (
     <Card className="glass-card">
       <CardHeader className="flex flex-row items-center justify-between">

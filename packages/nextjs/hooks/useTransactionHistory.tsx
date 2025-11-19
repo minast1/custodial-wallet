@@ -1,7 +1,8 @@
 import { useTargetNetwork } from "./scaffold-eth";
 import { useQuery } from "@tanstack/react-query";
-import { decodeFunctionData, erc20Abi } from "viem";
+//import { decodeFunctionData, erc20Abi } from "viem";
 import { UsePublicClientReturnType, useAccount, usePublicClient } from "wagmi";
+import { customDecodeTxData } from "~~/utils/customDecodeTxData";
 import { EXPLORER_APIS } from "~~/utils/explorer-apis";
 
 export type TxType = "native" | "erc20" | "erc721" | "erc1155" | "internal";
@@ -35,7 +36,12 @@ export type TxCategory =
       amount: number;
     }
   | {
-      category: "mint" | "burn" | "swap" | "received" | "sent" | "transfer";
+      category: "token_received";
+      symbol: string;
+      amount: number;
+    }
+  | {
+      category: "mint" | "burn" | "swap" | "sent" | "transfer" | "received";
     };
 const categoryParser = async function (
   tx: any,
@@ -76,49 +82,18 @@ const categoryParser = async function (
     return { category: "transfer" };
   }
 
-  try {
-    const decoded = decodeFunctionData({
-      abi: erc20Abi,
-      data: fullTx.input,
-    });
+  const res = await customDecodeTxData(fullTx, client);
 
-    if (decoded.functionName === "approve") {
-      const [, amount] = decoded.args as [string, bigint];
+  //Received token transfer
+  if (res && to === user) return { category: "token_received", amount: res.amount, symbol: res.symbol };
 
-      const tokenAddress = fullTx.to?.toLowerCase();
-
-      if (!tokenAddress || !client) return { category: "approval", symbol: "", amount: 0 };
-
-      const [decimals, symbol] = await Promise.all([
-        client
-          .readContract({
-            address: tokenAddress,
-            abi: erc20Abi,
-            functionName: "decimals",
-          })
-          .catch(() => 18),
-
-        client
-          .readContract({
-            address: tokenAddress,
-            abi: erc20Abi,
-            functionName: "symbol",
-          })
-          .catch(() => "UNKNOWN"),
-      ]);
-
-      const formattedAmount = Number(amount) / 10 ** decimals;
-      return {
-        category: "approval",
-        symbol,
-        amount: formattedAmount,
-      };
-    }
-  } catch (err: any) {
-    // Ignore ABI signature mismatch errors — normal for non-ERC20 calls
-    if (!(err?.name === "AbiFunctionSignatureNotFoundError" || err?.message?.includes("not found"))) {
-      console.warn("Unexpected decode error:", err);
-    }
+  //Approval
+  if (res) {
+    return {
+      category: "approval",
+      symbol: res.symbol,
+      amount: res.amount,
+    };
   }
 
   // --- Regular incoming/outgoing transfers ---
@@ -182,7 +157,12 @@ async function fetchConfirmedTxs(client: UsePublicClientReturnType, rpcUrl: stri
       direction: tx.to?.toLowerCase() === address.toLowerCase() ? "in" : "out",
       from: tx.from,
       to: tx.to,
-      value: category.category === "approval" ? category.amount : tx.value,
+      value:
+        category.category === "approval"
+          ? category.amount
+          : category.category === "token_received"
+            ? tx.value
+            : tx.value,
       tokenName: tx.asset ?? tx.tokenName,
       tokenSymbol: category.category === "approval" ? category.symbol : (tx.asset ?? tx.tokenSymbol),
       tokenId: tx.tokenId,
