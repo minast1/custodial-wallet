@@ -5,8 +5,9 @@ import { Search, TrendingDown, TrendingUp } from "lucide-react";
 import { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "~~/components/ui/card";
-import { Input } from "~~/components/ui/input";
+import { Card, CardContent, CardHeader } from "~~/components/ui/card";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
+//import { Input } from "~~/components/ui/input";
 import { useTargetNetwork, useWatchBalance } from "~~/hooks/scaffold-eth";
 import { useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
 import { getTokenIcon } from "~~/utils/get-tokenicon";
@@ -51,7 +52,8 @@ const TokensPage: NextPage = () => {
       </Card>
 
       {/* Search */}
-      <div className="relative">
+
+      {/* <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search tokens..."
@@ -59,12 +61,17 @@ const TokensPage: NextPage = () => {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-      </div>
+      </div> */}
 
       {/* Tokens List */}
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle>Your Tokens</CardTitle>
+          <InputGroup className="max-w-md">
+            <InputGroupInput placeholder="Search tokens..." value={search} onChange={e => setSearch(e.target.value)} />
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
