@@ -49,7 +49,7 @@ const DashboardPage: NextPage = () => {
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Network</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
+            <Globe className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{targetNetwork.name}</div>
@@ -63,7 +63,7 @@ const DashboardPage: NextPage = () => {
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Gas Price</CardTitle>
-            <Fuel className="h-4 w-4 text-muted-foreground" />
+            <Fuel className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -78,7 +78,7 @@ const DashboardPage: NextPage = () => {
         <Card className="glass-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">24h Change</CardTitle>
-            <TrendingUp className="h-4 w-4 text-success" />
+            <TrendingUp className="h-5 w-5 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">+$142.86</div>

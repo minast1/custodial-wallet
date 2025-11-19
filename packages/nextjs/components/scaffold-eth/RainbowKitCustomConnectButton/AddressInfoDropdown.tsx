@@ -145,7 +145,7 @@ export const AddressInfoDropdown = ({
         </ul>
       </details> */}
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger className="p-2 py-0 bg-background/10 h-10 w-fit flex items-center border-2 rounded-lg">
+        <DropdownMenuTrigger className="p-2 py-0 bg-background/10 h-10 w-fit flex items-center border-2 border-primary/30 rounded-lg">
           <div className="w-3 h-3 rounded-full animate-pulse mr-2" style={{ backgroundColor: networkColor }} />
           <BlockieAvatar address={checkSumAddress} size={23} ensImage={ensAvatar} />
           <span className="ml-2 mr-1 text-sm font-semibold">

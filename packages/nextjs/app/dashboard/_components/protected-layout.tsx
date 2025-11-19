@@ -157,7 +157,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                className="w-full border-primary justify-start text-destructive hover:bg-destructive hover:text-destructive-foreground"
                 onClick={handleDisconnect}
               >
                 <LogOut className="w-5 h-5 mr-2" />
