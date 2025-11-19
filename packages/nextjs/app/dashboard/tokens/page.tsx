@@ -7,6 +7,7 @@ import { useAccount } from "wagmi";
 import { Avatar, AvatarFallback, AvatarImage } from "~~/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "~~/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "~~/components/ui/input-group";
+import { Skeleton } from "~~/components/ui/skeleton";
 //import { Input } from "~~/components/ui/input";
 import { useTargetNetwork, useWatchBalance } from "~~/hooks/scaffold-eth";
 import { useGetTokenBalances } from "~~/hooks/tokens/useGetTokenBalances";
@@ -22,7 +23,7 @@ const TokensPage: NextPage = () => {
     chainId: targetNetwork.id,
     query: { enabled: !!isConnected },
   });
-  const { tokenData } = useGetTokenBalances(nativeBalance);
+  const { tokenData, isLoading } = useGetTokenBalances(nativeBalance);
 
   const filteredTokens = tokenData.tokens.filter(
     token =>
@@ -41,27 +42,24 @@ const TokensPage: NextPage = () => {
       {/* Total Value */}
       <Card className="glass-card">
         <CardContent className="p-6">
-          <p className="text-sm text-muted-foreground mb-1">Total Token Value</p>
-          <h2 className="text-4xl font-bold mb-2">{`$${tokenData?.totalUsdValue.toFixed(2)} USD`}</h2>
-
+          {isLoading ? (
+            <>
+              <Skeleton className="h-4 w-32 mb-2" />
+              <Skeleton className="h-10 w-48 mb-3" />
+              <Skeleton className="h-4 w-24" />
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-1">Total Token Value</p>
+              <h2 className="text-4xl font-bold mb-2">{`$${tokenData?.totalUsdValue.toFixed(2)} USD`}</h2>
+            </>
+          )}
           {/* <div className={clsx("flex items-center gap-1", tokenData.text-success")}>
             <TrendingUp className="w-4 h-4" />
             <span className="text-sm font-medium">+4.2% (24h)</span>
           </div> */}
         </CardContent>
       </Card>
-
-      {/* Search */}
-
-      {/* <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Search tokens..."
-          className="pl-10 max-w-md bg-card text-card-foreground"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div> */}
 
       {/* Tokens List */}
       <Card className="glass-card">
