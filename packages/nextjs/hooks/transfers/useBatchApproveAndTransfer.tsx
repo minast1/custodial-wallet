@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { type Address, encodeFunctionData, erc20Abi, parseUnits } from "viem";
 import { useAccount } from "wagmi";
 //import { queryClient } from "~~/components/ScaffoldEthAppWithProviders";
-import { getBlockExplorerTxLink, notification } from "~~/utils/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth";
 import { getParsedErrorWithAllAbis } from "~~/utils/scaffold-eth/contract";
 
 //import { notification } from "~~/utils/scaffold-eth";
@@ -53,7 +53,7 @@ export function useBatchApproveAndTransfer() {
   const mutation = useMutation<BatchTxResponse, Error, BatchAction>({
     mutationFn: async ({ approvals = [], transfers = [] }) => {
       let notificationId = null;
-      let blockExplorerTxURL = "";
+      //let blockExplorerTxURL = "";
 
       if (!walletClient || !address) {
         throw new Error("Wallet client not connected");
@@ -128,13 +128,9 @@ export function useBatchApproveAndTransfer() {
         notification.remove(notificationId);
 
         if (result.status === "success") {
-          const transactionHash = result.receipts?.at(0)?.transactionHash;
-          blockExplorerTxURL = result.chainId
-            ? getBlockExplorerTxLink(result.chainId, transactionHash as `0x${string}`)
-            : "";
           notification.remove(notificationId);
           notification.success(
-            <TxnNotification message="Transaction completed successfully!" blockExplorerLink={blockExplorerTxURL} />,
+            <TxnNotification message={`Batch executed across ${result.receipts?.length} transactions!`} />,
             {
               icon: "🎉",
             },
@@ -142,9 +138,15 @@ export function useBatchApproveAndTransfer() {
         }
 
         if (result.status === "failure" || result.status === undefined) {
-          notification.error(<TxnNotification message="Transaction failed!" blockExplorerLink={blockExplorerTxURL} />, {
-            icon: "🎉",
-          });
+          const failureReceipt = result.receipts?.find(r => r.status === "reverted");
+          notification.error(
+            <TxnNotification
+              message={`One or more transactions in the batched reverted.First failure hash: ${failureReceipt?.transactionHash}`}
+            />,
+            {
+              icon: "⚠️",
+            },
+          );
           throw new Error(result.status);
         }
 
