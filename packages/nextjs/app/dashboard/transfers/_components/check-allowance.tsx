@@ -52,7 +52,7 @@ const CheckAllowance = () => {
         <Search className="w-5 h-5 text-primary" />
         Check Allowance
       </h3>
-      <FieldGroup className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 space-y-3 bg-gray-100">
+      <FieldGroup className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 space-y-3 light:bg-gray-100">
         <div className="space-y-2">
           <Label className="text-base">Select Token</Label>
           <TokenStack isNativeTransfer={false} selectedToken={selectedToken} setToken={handleTokenChange} />

@@ -62,7 +62,7 @@ const SingleApprovalForm = () => {
   };
   return (
     <form className="space-y-4" onSubmit={handleSubmit(handleTokenApproval)}>
-      <FieldGroup className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 space-y-3 bg-gray-100">
+      <FieldGroup className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 space-y-3 light:bg-gray-100">
         <div className="space-y-3">
           <Label className="text-base">Select Token</Label>
           <TokenStack

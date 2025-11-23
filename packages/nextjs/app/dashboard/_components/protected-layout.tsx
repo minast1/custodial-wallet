@@ -12,15 +12,14 @@ import {
   Link2,
   LogOut,
   Menu,
-  Moon,
   Settings,
-  Sun,
   Wallet,
   X,
 } from "lucide-react";
-import { useTheme } from "next-themes";
+//import { useTheme } from "next-themes";
 import { useAccount } from "wagmi";
 import { useDisconnect } from "wagmi";
+import { SwitchTheme } from "~~/components/SwitchTheme";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { Button } from "~~/components/ui/button";
 import { cn } from "~~/lib/utils";
@@ -38,6 +37,7 @@ const navItems = [
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const router = useRouter();
   const { isConnected, status, chain } = useAccount();
   const { disconnect } = useDisconnect();
@@ -51,7 +51,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
 
   // const { disconnectWallet, address } = useWallet();
 
-  const { theme, setTheme } = useTheme();
+  //  const { theme, setTheme } = useTheme();
   //const navigate = useNavigate();
 
   const handleDisconnect = () => {
@@ -66,7 +66,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   if (!isReady && !isConnected && pathname.startsWith("/dashboard")) return null;
 
   return (
-    <div className="min-h-screen flex w-full">
+    <section className="min-h-screen flex w-full">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex lg:fixed lg:left-0 lg:top-0 lg:h-screen w-64 flex-col glass-card border-r overflow-y-auto">
         <div className="p-6 border-b border-glass-border">
@@ -82,6 +82,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
           {navItems.map(item => (
             <Link
               key={item.path}
+              // prefetch={true}
               href={item.path}
               className={cn(
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium`,
@@ -95,10 +96,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         </nav>
 
         <div className="p-4 border-t border-glass-border space-y-2">
-          <Button variant="outline" className="w-full justify-start" onClick={() => setTheme}>
-            {theme === "dark" ? <Sun className="w-5 h-5 mr-2" /> : <Moon className="w-5 h-5 mr-2" />}
-            {theme === "dark" ? "Light" : "Dark"} Mode
-          </Button>
+          <SwitchTheme className="justify-start w-full" />
           <Button
             variant="outline"
             className="w-full justify-start text-destructive hover:bg-destructive hover:text-destructive-foreground"
@@ -147,14 +145,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
             </nav>
 
             <div className="p-4 border-t border-glass-border space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                //onClick={toggleTheme}
-              >
-                {theme === "dark" ? <Sun className="w-5 h-5 mr-2" /> : <Moon className="w-5 h-5 mr-2" />}
-                {theme === "dark" ? "Light" : "Dark"} Mode
-              </Button>
+              <SwitchTheme className="w-full justify-start" />
               <Button
                 variant="outline"
                 className="w-full border-primary justify-start text-destructive hover:bg-destructive hover:text-destructive-foreground"
@@ -191,7 +182,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -249,7 +249,7 @@ const Transfers = ({ supportBatchTransfers, address, nativeBalance }: TProps) =>
             {fields.map((field, index) => (
               <FieldGroup
                 key={field.id}
-                className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 bg-gray-100"
+                className="flex flex-col gap-2 border boder-gray-300 rounded-2xl p-3 light:bg-gray-100"
               >
                 <Field orientation="horizontal" className="flex flex-1 items-center justify-betweeen">
                   <FieldDescription className="text-sm flex-1 font-semibold text-primary">
