@@ -36,23 +36,24 @@ const navItems = [
 ];
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const router = useRouter();
+  const pathname = usePathname();
   const { isConnected, status, chain } = useAccount();
   const { disconnect } = useDisconnect();
-  const cached = typeof window !== "undefined" && localStorage.getItem("isWalletConnected");
-  const [isReady, setIsReady] = useState(!!cached);
-  const pathname = usePathname();
+
+  const [isReady, setIsReady] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isReady && !isConnected && pathname.startsWith("/dashboard")) router.replace("/");
-  }, [isReady, router, isConnected, pathname]);
+    const cached = localStorage.getItem("isWalletConnected");
+    setIsReady(cached === "true");
+  }, []);
 
-  // const { disconnectWallet, address } = useWallet();
-
-  //  const { theme, setTheme } = useTheme();
-  //const navigate = useNavigate();
+  useEffect(() => {
+    if (status !== "connecting" && pathname.startsWith("/dashboard")) {
+      if (!isConnected && !isReady) router.replace("/");
+    }
+  }, [isReady, router, isConnected, pathname, status]);
 
   const handleDisconnect = () => {
     disconnect();
