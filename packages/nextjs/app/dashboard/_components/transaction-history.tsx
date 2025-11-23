@@ -57,7 +57,7 @@ const TransactionHistory = () => {
                 >
                   <AvatarFallback
                     className={`${
-                      tx.category === "received"
+                      tx.category.includes("received")
                         ? "bg-success/20 "
                         : tx.category === "pending"
                           ? "bg-secondary/20"
@@ -68,7 +68,7 @@ const TransactionHistory = () => {
                               : "bg-primary/10"
                     }`}
                   >
-                    {tx.category === "received" ? (
+                    {tx.category.includes("received") ? (
                       <ArrowDownRight className="w-5 h-5 text-success" />
                     ) : tx.category === "pending" ? (
                       <ClipboardClock className="w-5 h-5" />
@@ -84,7 +84,9 @@ const TransactionHistory = () => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="font-medium capitalize">{tx.category}</p>
+                    <p className="font-medium capitalize">
+                      {tx.category.includes("received") ? "received" : tx.category}
+                    </p>
                     <Badge
                       className={clsx(
                         "text-xs",

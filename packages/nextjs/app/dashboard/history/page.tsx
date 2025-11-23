@@ -2,8 +2,18 @@
 
 import React, { useState } from "react";
 import TransactionSkeleton from "./_components/transaction-skeleton";
+import clsx from "clsx";
 import { format } from "date-fns";
-import { ArrowDownRight, ArrowUpRight, Calendar, ExternalLink, RefreshCw } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Calendar,
+  CirclePoundSterling,
+  ClipboardClock,
+  ExternalLink,
+  RefreshCcw,
+  RefreshCw,
+} from "lucide-react";
 import { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { Badge } from "~~/components/ui/badge";
@@ -72,26 +82,43 @@ const HistoryPage: NextPage = () => {
                     <div className="flex items-center gap-3 flex-1">
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          tx.category === "received"
+                          tx.category.includes("received")
                             ? "bg-success/10"
                             : tx.category === "sent"
                               ? "bg-destructive/10"
-                              : "bg-accent/50"
+                              : tx.category === "approval"
+                                ? "bg-warning/20"
+                                : "bg-accent/50"
                         }`}
                       >
-                        {tx.category === "received" ? (
+                        {tx.category.includes("received") ? (
                           <ArrowDownRight className="w-5 h-5 text-success" />
+                        ) : tx.category === "pending" ? (
+                          <ClipboardClock className="w-5 h-5" />
                         ) : tx.category === "sent" ? (
                           <ArrowUpRight className="w-5 h-5 text-destructive" />
+                        ) : tx.category === "approval" ? (
+                          <CirclePoundSterling className="w-5 h-5 text-warning" />
                         ) : (
-                          <RefreshCw className="w-5 h-5 text-accent-foreground" />
+                          <RefreshCcw className="w-5 h-5 text-primary" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold capitalize">{tx.category}</p>
-                          <Badge variant="outline" className="text-xs border-primary/20">
-                            {tx.status}
+                          <p className="font-semibold capitalize">
+                            {tx.category.includes("received") ? "received" : tx.category}
+                          </p>
+                          <Badge
+                            className={clsx(
+                              "text-xs",
+                              tx.status === "confirmed"
+                                ? "bg-green-500"
+                                : tx.status === "failed"
+                                  ? "bg-destructive/10"
+                                  : "bg-secondary/10",
+                            )}
+                          >
+                            {tx.status === "confirmed" || tx.status === "failed" ? "completed" : "pending"}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground font-mono truncate w-1/5">{tx.hash}</p>
