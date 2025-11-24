@@ -11,8 +11,7 @@ import {
   Image,
   Link2,
   LogOut,
-  Menu,
-  Settings,
+  Menu, //Settings,
   Wallet,
   X,
 } from "lucide-react";
@@ -32,7 +31,7 @@ const navItems = [
   { name: "Transfers", path: "/dashboard/transfers", icon: ArrowLeftRight },
   { name: "History", path: "/dashboard/history", icon: History },
   { name: "NFTs", path: "/dashboard/nfts", icon: Image },
-  { name: "Settings", path: "/dashboard/settings", icon: Settings },
+  // { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
@@ -134,9 +133,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
                     `flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium`,
-                    pathname.includes(item.path)
-                      ? `bg-primary text-primary-foreground shadow-lg`
-                      : `hover:bg-accent/50`,
+                    pathname === item.path ? `bg-primary text-primary-foreground shadow-lg` : `hover:bg-accent/50`,
                   )}
                 >
                   <item.icon className="w-5 h-5" />

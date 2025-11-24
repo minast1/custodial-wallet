@@ -83,7 +83,7 @@ const TransactionHistory = () => {
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col md:flex-row items-center gap-2 mb-1">
                     <p className="font-medium capitalize">
                       {tx.category.includes("received") ? "received" : tx.category}
                     </p>

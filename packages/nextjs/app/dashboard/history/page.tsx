@@ -41,7 +41,7 @@ const HistoryPage: NextPage = () => {
           </h1>
           <p className="text-muted-foreground">View all your past transactions</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <Button className="gap-2" onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4" />
             Refresh

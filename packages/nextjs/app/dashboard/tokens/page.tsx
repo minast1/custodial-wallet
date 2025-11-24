@@ -97,7 +97,7 @@ const TokensPage: NextPage = () => {
                   <p className="text-sm text-muted-foreground">${token.usdValue?.toFixed(2)}</p>
                 </div>
                 <div
-                  className={`flex items-center gap-1 min-w-[80px] justify-end ${
+                  className={`hidden md:flex items-center gap-1 min-w-[80px] justify-end ${
                     token.percentage_change_24h > 0 ? "text-success" : "text-destructive"
                   }`}
                 >
