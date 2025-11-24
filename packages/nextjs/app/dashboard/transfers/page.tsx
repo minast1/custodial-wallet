@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Approvals from "./_components/approvals";
 import CheckAllowance from "./_components/check-allowance";
-import Swaps from "./_components/swaps";
+import Receive from "./_components/receive";
 import Transfers from "./_components/transfers";
 //import BatchTxsIndicatorBadge from "./_components/batchtransactions-indicatorbadge";
 import { AlertCircleIcon, ShieldCheck } from "lucide-react";
@@ -49,8 +49,8 @@ const TransfersPage: NextPage = () => {
         {/* Send */}
         <Transfers supportBatchTransfers={supportsAtomicActions} address={address} nativeBalance={nativeBalance} />
 
-        {/* Swap */}
-        <Swaps />
+        {/* Receive */}
+        <Receive />
 
         {/* Token Approvals */}
         <Card className="glass-card border-2 hover:border-primary/50 transition-all duration-300 lg:col-span-2">
