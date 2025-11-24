@@ -1,80 +1,119 @@
-# 🏗 Scaffold-ETH 2
+# 🏗 Web3 Wallet Application
 
+<!--
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
   <a href="https://scaffoldeth.io">Website</a>
-</h4>
+</h4> -->
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+🧪 This project is a modern, full-stack Web3 wallet application built with a focus on simplicity, speed, and an intuitive user experience. It enables users to send, receive, store, and visualize digital assets across Ethereum-compatible networks while integrating advanced blockchain tooling and best-practice protocols.
 
-⚙️ Built using NextJS, RainbowKit, Foundry, Wagmi, Viem, and Typescript.
+⚙️ Built using NextJS, RainbowKit, Foundry,TailwindCss, Wagmi, Viem, and Typescript.
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
+⭐ Core Features
+
+- **Multi-Asset Support**:
+  The wallet supports:
+
+Native tokens (ETH, MATIC, etc.)
+
+ERC-20 tokens
+
+ERC-721 NFTs
+
+ERC-1155 multi-asset NFTs
+
+Users can:
+
+View token balances
+
+View NFT collections (with metadata and floor price)
+
+Send and receive any token or NFT
+
+Track transaction history (transfers, swaps, approvals, mints, burns)
+
+- 🔥 **Transaction Categorization Engine**:
+  Incoming transaction data is normalized and categorized using:
+
+Alchemy’s getAssetTransfers API
+
+Contract ABI decoding via viem
+
+Categories include:
+
+sent
+
+received
+
+swap
+
+approval
+
+mint
+
+burn
+
+transfer
+
+The wallet detects:
+
+Token approvals (approve(spender, amount))
+
+Token swaps via major DEX routers
+
+Minting and burning events
+
+Native vs token transfers
+
 - 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+## ⭐ 3. NFT Portfolio Viewer
 
-## Requirements
+Using Alchemy NFT API, the wallet fetches:
 
-Before you begin, you need to install the following tools:
+Owned NFTs
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
+Full metadata (image, traits, collection info)
 
-## Quickstart
+Collection floor price
 
-To get started with Scaffold-ETH 2, follow the steps below:
+Multi-chain support (Ethereum, Polygon, Base, etc.)
 
-1. Install dependencies if it was skipped in CLI:
+A React Query hook manages:
 
-```
-cd my-dapp-example
-yarn install
-```
+Caching
 
-2. Run a local network in the first terminal:
+Pagination
 
-```
-yarn chain
-```
+Automatic refetching
 
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
+Error boundaries
 
-3. On a second terminal, deploy the test contract:
+⭐ 4. Receive Page
 
-```
-yarn deploy
-```
+A clean, universal “Receive Asset” screen that provides:
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
+QR code containing the user’s address
 
-4. On a third terminal, start your NextJS app:
+ENS name fallback
 
-```
-yarn start
-```
+Animated scanning frame
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+Copy-to-clipboard support
 
-Run smart contract test with `yarn foundry:test`
+Compatible with all tokens and NFTs (no token-specific receive logic needed)
 
-- Edit your smart contracts in `packages/foundry/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
+⭐ 5. Send Flow
 
+Tokens can be sent using:
 
-## Documentation
+viem writeContract or wagmi’s useContractWrite
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
+Auto-detection of token type
 
-To know more about its features, check out our [website](https://scaffoldeth.io).
+Gas estimation
 
-## Contributing to Scaffold-ETH 2
+Automated decimal handling for ERC-20 tokens
 
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+Multi-chain support is integrated using wagmi connectors.
